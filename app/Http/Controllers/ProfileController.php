@@ -12,6 +12,19 @@ use Intervention\Image\Laravel\Facades\Image;
 
 class ProfileController extends Controller
 {
+    public function show(Request $request): JsonResponse
+    {
+        $profile = $request->user()->masterProfile;
+
+        if (! $profile) {
+            return response()->json(['message' => 'Профиль не найден.'], 404);
+        }
+
+        $profile->load(['city', 'category', 'user', 'portfolioImages']);
+
+        return response()->json($profile);
+    }
+
     public function update(Request $request): JsonResponse
     {
         $profile = $request->user()->masterProfile;

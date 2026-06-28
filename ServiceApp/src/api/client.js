@@ -23,3 +23,22 @@ export async function api(endpoint, options = {}) {
 
   return res.json();
 }
+
+export async function apiUpload(endpoint, formData) {
+  const token = await SecureStore.getItemAsync('token');
+
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, ...error };
+  }
+
+  return res.json();
+}

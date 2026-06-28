@@ -18,6 +18,7 @@ Route::get('/masters/{id}', [MasterController::class, 'show']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    Route::get('/profile', [ProfileController::class, 'show']);
     Route::post('/profile/update', [ProfileController::class, 'update']);
     Route::post('/profile/status', [ProfileController::class, 'status']);
     Route::post('/profile/portfolio', [ProfileController::class, 'portfolio']);

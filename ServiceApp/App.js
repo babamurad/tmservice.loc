@@ -9,10 +9,13 @@ import CatalogScreen from './src/screens/catalog/CatalogScreen';
 import MastersListScreen from './src/screens/catalog/MastersListScreen';
 import MasterDetailScreen from './src/screens/catalog/MasterDetailScreen';
 import SearchScreen from './src/screens/search/SearchScreen';
-import ProfileScreen from './src/screens/profile/ProfileScreen';
+import MyProfileScreen from './src/screens/profile/MyProfileScreen';
+import EditProfileScreen from './src/screens/profile/EditProfileScreen';
+import MyQRScreen from './src/screens/profile/MyQRScreen';
 
 const AuthStackNav = createNativeStackNavigator();
 const CatalogStackNav = createNativeStackNavigator();
+const ProfileStackNav = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function AuthStack() {
@@ -34,12 +37,22 @@ function CatalogStack() {
   );
 }
 
+function ProfileStack() {
+  return (
+    <ProfileStackNav.Navigator>
+      <ProfileStackNav.Screen name="MyProfile" component={MyProfileScreen} options={{ title: 'Профиль' }} />
+      <ProfileStackNav.Screen name="EditProfile" component={EditProfileScreen} options={{ title: 'Редактировать' }} />
+      <ProfileStackNav.Screen name="MyQR" component={MyQRScreen} options={{ title: 'Мой QR-код' }} />
+    </ProfileStackNav.Navigator>
+  );
+}
+
 function MainTabs() {
   return (
     <Tab.Navigator>
       <Tab.Screen name="Catalog" component={CatalogStack} options={{ headerShown: false, title: 'Каталог' }} />
       <Tab.Screen name="Search" component={SearchScreen} options={{ title: 'Поиск' }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Профиль' }} />
+      <Tab.Screen name="Profile" component={ProfileStack} options={{ headerShown: false, title: 'Профиль' }} />
     </Tab.Navigator>
   );
 }
