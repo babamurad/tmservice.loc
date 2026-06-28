@@ -21,4 +21,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'update']);
     Route::post('/profile/status', [ProfileController::class, 'status']);
     Route::post('/profile/portfolio', [ProfileController::class, 'portfolio']);
+    Route::post('/profile/qr', [ProfileController::class, 'generateQr']);
 });

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\PortfolioImage;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -69,5 +71,28 @@ class ProfileController extends Controller
         ]);
 
         return response()->json($portfolioImage, 201);
+    }
+
+    public function generateQr(Request $request): JsonResponse
+    {
+        $profile = $request->user()->masterProfile;
+
+        if (! $profile) {
+            return response()->json(['message' => 'Профиль не найден.'], 404);
+        }
+
+        $filename = 'qr_master_' . $profile->id . '.png';
+
+        $qrCode = new QrCode('appscheme://master/' . $profile->id);
+        $writer = new PngWriter();
+        $result = $writer->write($qrCode);
+
+        Storage::disk('public')->put('qr/' . $filename, $result->getString());
+
+        $profile->update(['qr_code_path' => 'qr/' . $filename]);
+
+        return response()->json([
+            'qr_code_url' => asset('storage/qr/' . $filename),
+        ]);
     }
 }
