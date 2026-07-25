@@ -135,25 +135,20 @@ cooldown, успешная верификация, неверный код (сч
   - [x] Шаг 3.1.1: Инвалидация кэша при изменении справочников — реализована через `City`/`Category` model events (`booted()`, `saved`/`deleted` → `Cache::forget`), не зависит от появления админки (Этап 5/C2) — сработает при любом способе изменения записи (сидер, tinker, будущая админка).
   - [x] Шаг 3.1.2 (новое, версионирование справочников — было Block B2 в старом dop_tz.md): `DirectoryController::cachedJson()` отдаёт `ETag` (md5 тела ответа) и обрабатывает `If-None-Match` → `304 Not Modified` без тела. Клиент присылает сохранённый `ETag`, качает полный список только если он изменился — см. `02-mobile.md`, Этап 5.
   - Уточнение: этот кэш — оптимизация нагрузки на БД, а не «офлайн» — офлайн реализуется на клиенте (`02-mobile.md`).
-- [~] Шаг 3.2: `MasterController@index`/`show` — базовая версия с фильтрами `city_id`/`category_id`, сортировкой по `is_free`, пагинацией — сделано. Осталось:
-  - [ ] `city_id` учитывает `parent_city_id` (см. Шаг 1.2.1 / `README.md` п.1) — головной город включает мастеров из посёлков-спутников.
-  - [x] rate limiting (Этап 2B) — сделано.
-  - [ ] фильтр `moderation_status = approved` (Этап C2.3).
-  - [ ] поиск `?q=` (Этап C1).
-  - [ ] поля `avg_rating`/`reviews_count` (Этап D).
+- [~] Шаг 3.2: `MasterController@index`/`show` — фильтры `city_id`/`category_id`, сортировка `is_free` → `avg_rating`, пагинация, rate limiting, `moderation_status = approved`, поиск `?q=`, `avg_rating`/`reviews_count` — всё сделано. Осталось только:
+  - [ ] `city_id` учитывает `parent_city_id` (см. Шаг 1.2.1 / `README.md` п.1) — головной город включает мастеров из посёлков-спутников. Единственный незакрытый пункт этого шага.
 
 Покрыто тестами: `tests/Feature/DirectoryCacheTest.php` — `ETag` присутствует,
 повтор с тем же `If-None-Match` → `304` с пустым телом, добавление/удаление
 записи меняет `ETag` (доказывает, что инвалидация реально работает, а не
 просто TTL истёк). Полный набор тестов (`php artisan test`) — зелёный (26/26).
-- [x] Шаг 3.3: `ProfileController` (`auth:sanctum`) — `update`, `status` (тумбл. `is_free`), `portfolio` (загрузка + сжатие через Intervention Image → webp) — сделано.
-  - [ ] Удаление фото из портфолио и лимит по числу — см. Этап C3.
+- [x] Шаг 3.3: `ProfileController` (`auth:sanctum`) — `update`, `status` (тумбл. `is_free`), `portfolio` (загрузка + сжатие через Intervention Image → webp), удаление фото и лимит 10 шт. (Этап C3/7) — всё сделано.
 
 ---
 
 ## Этап 4. QR-коды
 
-- [~] Шаг 4.1–4.2: `ProfileController@generateQr` генерирует `.png` через `endroid/qr-code`, сохраняет в `storage/app/public/qr` — сделано технически, **но кодирует `appscheme://master/{id}`** — см. проблему ниже.
+- [x] Шаг 4.1–4.2: `ProfileController@generateQr` генерирует `.png` через `endroid/qr-code`, сохраняет в `storage/app/public/qr`, кодирует `route('master.link', $id)` (`https://{домен}/m/{id}`) — см. Этап 4A, там же обновлено содержимое ссылки.
 
 ### Этап 4A. QR через Universal Links / App Links (замена кастомной схемы)
 
