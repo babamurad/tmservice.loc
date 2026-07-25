@@ -3,12 +3,18 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\MasterController;
+use App\Http\Controllers\OtpController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('throttle:auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+});
+
+Route::middleware('throttle:otp')->group(function () {
+    Route::post('/auth/send-otp', [OtpController::class, 'send']);
+    Route::post('/auth/verify-otp', [OtpController::class, 'verify']);
 });
 
 Route::get('/cities', [DirectoryController::class, 'cities']);

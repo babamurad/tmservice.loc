@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\SmsGateway;
+use App\Services\Sms\LogSmsGateway;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -14,7 +16,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Реальный провайдер для +993 ещё не выбран (нужен спайк — см.
+        // plan/01-backend.md, Этап 2A) — пока единственная реализация.
+        $this->app->bind(SmsGateway::class, LogSmsGateway::class);
     }
 
     /**
@@ -26,7 +30,6 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('auth', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
 
-        // Ещё не навешан ни на один маршрут — send-otp/verify-otp появятся в Этапе 2A.
         RateLimiter::for('otp', fn (Request $request) => Limit::perMinutes(60, 5)->by($request->input('phone')));
     }
 }
