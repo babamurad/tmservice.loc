@@ -7,7 +7,14 @@ const etagKey = (cacheKey) => sanitizeKey(`directory_etag_${cacheKey}`);
 
 export async function getCachedDirectory(cacheKey) {
   const raw = await getItemAsync(dataKey(cacheKey));
-  return raw ? JSON.parse(raw) : null;
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchDirectory(endpoint, cacheKey) {
@@ -30,6 +37,10 @@ export async function fetchDirectory(endpoint, cacheKey) {
   }
 
   const data = await res.json();
+  if (!Array.isArray(data)) {
+    throw new Error(`Unexpected response shape from ${endpoint}: expected an array`);
+  }
+
   const newEtag = res.headers.get('ETag');
 
   await setItemAsync(dataKey(cacheKey), JSON.stringify(data));
