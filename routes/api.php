@@ -6,14 +6,18 @@ use App\Http\Controllers\MasterController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('throttle:auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
 Route::get('/cities', [DirectoryController::class, 'cities']);
 Route::get('/categories', [DirectoryController::class, 'categories']);
 
-Route::get('/masters', [MasterController::class, 'index']);
-Route::get('/masters/{id}', [MasterController::class, 'show']);
+Route::middleware('throttle:public-read')->group(function () {
+    Route::get('/masters', [MasterController::class, 'index']);
+    Route::get('/masters/{id}', [MasterController::class, 'show']);
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);

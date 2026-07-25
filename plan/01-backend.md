@@ -85,14 +85,19 @@
 но без лимита базу легко спарсить. `login`/`send-otp` без лимитов открыты
 для брутфорса и SMS-флуда (SMS — это ещё и деньги).
 
-- [ ] Шаг 2B.1: Именованные лимитеры (`bootstrap/app.php` для Laravel 11+):
+- [x] Шаг 2B.1: Именованные лимитеры — сделано в `app/Providers/AppServiceProvider.php@boot()` (не в `bootstrap/app.php` — там для этого нет подходящего хука в Laravel 13, `RateLimiter::for` регистрируется в провайдере):
   ```php
-  RateLimiter::for('public-read', fn($r) => Limit::perMinute(60)->by($r->ip()));
-  RateLimiter::for('auth',        fn($r) => Limit::perMinute(5)->by($r->ip()));
-  RateLimiter::for('otp',         fn($r) => Limit::perMinutes(60, 5)->by($r->input('phone')));
+  RateLimiter::for('public-read', fn (Request $r) => Limit::perMinute(60)->by($r->ip()));
+  RateLimiter::for('auth',        fn (Request $r) => Limit::perMinute(5)->by($r->ip()));
+  RateLimiter::for('otp',         fn (Request $r) => Limit::perMinutes(60, 5)->by($r->input('phone')));
   ```
-- [ ] Шаг 2B.2: `throttle:public-read` на `GET /api/masters`, `GET /api/masters/{id}`.
-- [ ] Шаг 2B.3: `throttle:auth` на `login`/`register`, `throttle:otp` на `send-otp`/`verify-otp`.
+  `otp`-лимитер зарегистрирован заранее, но пока ни на один маршрут не навешан — `send-otp`/`verify-otp` появятся в Этапе 2A, тогда же и подключить `throttle:otp`.
+- [x] Шаг 2B.2: `throttle:public-read` на `GET /api/masters`, `GET /api/masters/{id}` (`routes/api.php`).
+- [x] Шаг 2B.3 (частично): `throttle:auth` на `login`/`register`. `throttle:otp` — отложено до Этапа 2A (маршрутов ещё нет).
+
+Покрыто тестами: `tests/Feature/RateLimitTest.php` — 6-я подряд неудачная
+попытка логина за минуту → `429` с `Retry-After`; 61-й запрос `GET /api/masters`
+за минуту → `429`. Полный набор тестов (`php artisan test`) — зелёный.
 
 **Критерии приёмки**: превышение лимита → `429` с `Retry-After`. Массовый перебор `masters/{id}` упирается в лимит.
 

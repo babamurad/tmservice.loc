@@ -23,7 +23,8 @@
 - ✅ Генерация QR (endroid/qr-code), сжатие фото (Intervention Image → webp).
 - ✅ Мобильное приложение: Expo 56 / RN 0.85 / React Navigation 7, ~10 экранов уже написаны (auth, catalog, masters list/detail, profile, search, QR).
 - ✅ **П0 закрыт**: `POST /api/register` больше не принимает `role=admin` от клиента — валидация вынесена в `RegisterRequest` (`in:client,master`), роль `admin` теперь выдаётся только через `php artisan make:admin {phone}`. Покрыто тестами (`tests/Feature/RegisterRoleTest.php`). См. `01-backend.md`, П0.
-- ⛔ Ещё не сделано: OTP-верификация телефона, rate limiting, модерация мастеров, админка, отзывы/рейтинги, QR через https-домен вместо `appscheme://`, офлайн-персист в мобильном приложении.
+- ✅ **Этап 2B (rate limiting) закрыт**: `throttle:public-read` на `GET /api/masters(/{id})`, `throttle:auth` на `login`/`register`. `otp`-лимитер зарегистрирован заранее, подключится вместе с Этапом 2A. Покрыто тестами (`tests/Feature/RateLimitTest.php`). См. `01-backend.md`, Этап 2B.
+- ⛔ Ещё не сделано: OTP-верификация телефона, модерация мастеров, админка, отзывы/рейтинги, QR через https-домен вместо `appscheme://`, офлайн-персист в мобильном приложении.
 
 ## Принятые решения (с обоснованием)
 
@@ -62,7 +63,7 @@
 
 ### 2. React Native (Expo) vs Vue для мобильного приложения
 
-**Решение: остаться на React Native / Expo.**
+**Решение: остаться на React Native / Expo — подтверждено.**
 
 Понимаю опасение — Vue тебе роднее. Но смотрю на факты в репозитории:
 `ServiceApp/` уже содержит ~10 рабочих экранов (Login, Register, Catalog,
@@ -92,8 +93,7 @@ MastersList, MasterDetail, MyProfile, EditProfile, Search, MyQR),
    компоненты в этом проекте однотипны, паттерн быстро схватывается за
    пару экранов.
 
-Если после этого пункта опасение всё равно перевешивает — скажи явно,
-перепишем на Ionic+Vue. Но по умолчанию план строится на продолжении RN/Expo.
+Подтверждено — план и весь код мобильного приложения продолжаются на RN/Expo.
 
 ### 3. SMS-шлюз для Туркменистана
 
