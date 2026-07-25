@@ -20,6 +20,7 @@ export default function MyProfileScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -79,6 +80,28 @@ export default function MyProfileScreen({ navigation }) {
       Alert.alert('Ошибка', 'Не удалось загрузить фото');
     } finally {
       setUploading(false);
+    }
+  }
+
+  function confirmDeletePhoto(id) {
+    Alert.alert('Удалить фото?', 'Это действие нельзя отменить.', [
+      { text: 'Отмена', style: 'cancel' },
+      { text: 'Удалить', style: 'destructive', onPress: () => deletePhoto(id) },
+    ]);
+  }
+
+  async function deletePhoto(id) {
+    setDeletingId(id);
+    try {
+      await api(`/profile/portfolio/${id}`, { method: 'DELETE' });
+      setProfile((prev) => ({
+        ...prev,
+        portfolio_images: prev.portfolio_images.filter((image) => image.id !== id),
+      }));
+    } catch (err) {
+      Alert.alert('Ошибка', 'Не удалось удалить фото');
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -180,11 +203,24 @@ export default function MyProfileScreen({ navigation }) {
         </>
       }
       renderItem={({ item }) => (
-        <Image
-          source={{ uri: `https://tmservice.loc/storage/${item.image_path}` }}
-          style={styles.portfolioImage}
-          resizeMode="cover"
-        />
+        <View style={styles.portfolioItem}>
+          <Image
+            source={{ uri: `https://tmservice.loc/storage/${item.image_path}` }}
+            style={styles.portfolioImage}
+            resizeMode="cover"
+          />
+          <TouchableOpacity
+            style={styles.deletePhotoButton}
+            onPress={() => confirmDeletePhoto(item.id)}
+            disabled={deletingId === item.id}
+          >
+            {deletingId === item.id ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={styles.deletePhotoButtonText}>✕</Text>
+            )}
+          </TouchableOpacity>
+        </View>
       )}
       keyExtractor={(item) => String(item.id)}
       ListFooterComponent={
@@ -246,12 +282,24 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   uploadButtonText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  portfolioItem: { marginBottom: 12 },
   portfolioImage: {
     width: '100%',
     height: 200,
     borderRadius: 12,
-    marginBottom: 12,
   },
+  deletePhotoButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  deletePhotoButtonText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   logoutButton: {
     backgroundColor: '#FF3B30',
     padding: 16,

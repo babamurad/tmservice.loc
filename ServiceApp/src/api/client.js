@@ -21,6 +21,10 @@ export async function api(endpoint, options = {}) {
     throw { status: res.status, ...error };
   }
 
+  if (res.status === 204) {
+    return null;
+  }
+
   return res.json();
 }
 
