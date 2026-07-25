@@ -15,6 +15,7 @@ import MyQRScreen from './src/screens/profile/MyQRScreen';
 
 const AuthStackNav = createNativeStackNavigator();
 const CatalogStackNav = createNativeStackNavigator();
+const SearchStackNav = createNativeStackNavigator();
 const ProfileStackNav = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -37,6 +38,15 @@ function CatalogStack() {
   );
 }
 
+function SearchStack() {
+  return (
+    <SearchStackNav.Navigator>
+      <SearchStackNav.Screen name="SearchHome" component={SearchScreen} options={{ title: 'Поиск' }} />
+      <SearchStackNav.Screen name="MasterDetail" component={MasterDetailScreen} options={{ title: 'Мастер' }} />
+    </SearchStackNav.Navigator>
+  );
+}
+
 function ProfileStack() {
   return (
     <ProfileStackNav.Navigator>
@@ -51,7 +61,7 @@ function MainTabs() {
   return (
     <Tab.Navigator>
       <Tab.Screen name="Catalog" component={CatalogStack} options={{ headerShown: false, title: 'Каталог' }} />
-      <Tab.Screen name="Search" component={SearchScreen} options={{ title: 'Поиск' }} />
+      <Tab.Screen name="Search" component={SearchStack} options={{ headerShown: false, title: 'Поиск' }} />
       <Tab.Screen name="Profile" component={ProfileStack} options={{ headerShown: false, title: 'Профиль' }} />
     </Tab.Navigator>
   );
