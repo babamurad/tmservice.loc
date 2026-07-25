@@ -63,4 +63,9 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Выход выполнен успешно.']);
     }
+
+    public function me(Request $request): JsonResponse
+    {
+        return response()->json($request->user());
+    }
 }

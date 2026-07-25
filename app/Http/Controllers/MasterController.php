@@ -34,6 +34,7 @@ class MasterController extends Controller
         }
 
         $masters = $query->orderByDesc('is_free')
+            ->orderByDesc('avg_rating')
             ->paginate(15);
 
         return response()->json($masters);

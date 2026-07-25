@@ -3,12 +3,14 @@
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CityController as AdminCityController;
 use App\Http\Controllers\Admin\MasterModerationController;
+use App\Http\Controllers\Admin\ReviewModerationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\MasterController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('throttle:auth')->group(function () {
@@ -27,10 +29,12 @@ Route::get('/categories', [DirectoryController::class, 'categories']);
 Route::middleware('throttle:public-read')->group(function () {
     Route::get('/masters', [MasterController::class, 'index']);
     Route::get('/masters/{id}', [MasterController::class, 'show']);
+    Route::get('/masters/{id}/reviews', [ReviewController::class, 'index']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/me', [AuthController::class, 'me']);
 
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::post('/profile/update', [ProfileController::class, 'update']);
@@ -38,6 +42,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/portfolio', [ProfileController::class, 'portfolio']);
     Route::delete('/profile/portfolio/{id}', [ProfileController::class, 'deletePortfolio']);
     Route::post('/profile/qr', [ProfileController::class, 'generateQr']);
+
+    Route::post('/masters/{id}/reviews', [ReviewController::class, 'store']);
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
@@ -56,4 +62,8 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/masters/{master}/reject', [MasterModerationController::class, 'reject']);
 
     Route::get('/users', [AdminUserController::class, 'index']);
+
+    Route::get('/reviews', [ReviewModerationController::class, 'index']);
+    Route::post('/reviews/{review}/approve', [ReviewModerationController::class, 'approve']);
+    Route::post('/reviews/{review}/reject', [ReviewModerationController::class, 'reject']);
 });

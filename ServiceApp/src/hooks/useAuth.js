@@ -16,8 +16,8 @@ export function AuthProvider({ children }) {
     try {
       const token = await SecureStore.getItemAsync('token');
       if (token) {
-        // TODO: fetch user profile to validate token
-        setUser({ token });
+        const me = await api('/me');
+        setUser(me);
       }
     } catch {
       await SecureStore.deleteItemAsync('token');

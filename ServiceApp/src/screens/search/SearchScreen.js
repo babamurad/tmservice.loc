@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { api } from '../../api/client';
 import { getCachedDirectory } from '../../api/directoryCache';
+import { renderStars } from '../../utils/rating';
 
 export default function SearchScreen({ navigation }) {
   const [query, setQuery] = useState('');
@@ -132,6 +133,11 @@ export default function SearchScreen({ navigation }) {
                   style={[styles.dot, { backgroundColor: item.is_free ? '#34C759' : '#FF3B30' }]}
                 />
               </View>
+              {item.reviews_count > 0 && (
+                <Text style={styles.rating}>
+                  {renderStars(item.avg_rating)} ({item.reviews_count})
+                </Text>
+              )}
               <Text style={styles.bio} numberOfLines={2}>
                 {item.bio || 'Нет описания'}
               </Text>
@@ -207,6 +213,7 @@ const styles = StyleSheet.create({
   },
   name: { fontSize: 16, fontWeight: '600' },
   dot: { width: 12, height: 12, borderRadius: 6 },
+  rating: { fontSize: 13, color: '#f5a623', marginBottom: 4 },
   bio: { fontSize: 14, color: '#666', marginBottom: 6 },
   meta: { fontSize: 12, color: '#999' },
   empty: { fontSize: 16, color: '#999' },

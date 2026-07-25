@@ -14,12 +14,15 @@ class MasterProfile extends Model
      */
     protected $attributes = [
         'moderation_status' => 'pending',
+        'avg_rating' => 0,
+        'reviews_count' => 0,
     ];
 
     protected function casts(): array
     {
         return [
             'is_free' => 'boolean',
+            'avg_rating' => 'float',
         ];
     }
 
@@ -43,6 +46,11 @@ class MasterProfile extends Model
         return $this->hasMany(PortfolioImage::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function approve(): void
     {
         $this->forceFill(['moderation_status' => 'approved'])->save();
@@ -51,5 +59,18 @@ class MasterProfile extends Model
     public function reject(): void
     {
         $this->forceFill(['moderation_status' => 'rejected'])->save();
+    }
+
+    public function recalculateRating(): void
+    {
+        $stats = $this->reviews()
+            ->where('moderation_status', 'approved')
+            ->selectRaw('COUNT(*) as count, COALESCE(AVG(rating), 0) as avg')
+            ->first();
+
+        $this->forceFill([
+            'avg_rating' => round((float) $stats->avg, 2),
+            'reviews_count' => (int) $stats->count,
+        ])->save();
     }
 }
