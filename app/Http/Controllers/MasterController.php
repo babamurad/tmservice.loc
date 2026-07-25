@@ -12,7 +12,8 @@ class MasterController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = MasterProfile::with(['city', 'category', 'user'])
-            ->whereHas('user', fn ($q) => $q->whereNotNull('phone_verified_at'));
+            ->whereHas('user', fn ($q) => $q->whereNotNull('phone_verified_at'))
+            ->where('moderation_status', 'approved');
 
         if ($request->filled('city_id')) {
             $query->where('city_id', $request->city_id);
@@ -57,6 +58,7 @@ class MasterController extends Controller
     {
         $master = MasterProfile::with(['city', 'category', 'user', 'portfolioImages'])
             ->whereHas('user', fn ($q) => $q->whereNotNull('phone_verified_at'))
+            ->where('moderation_status', 'approved')
             ->findOrFail($id);
 
         return response()->json($master);

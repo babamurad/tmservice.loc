@@ -108,7 +108,7 @@ class OtpTest extends TestCase
     {
         $user = User::create(['phone' => self::PHONE, 'password' => Hash::make('secret123'), 'role' => 'master']);
         $user->markPhoneAsVerified();
-        $user->masterProfile()->create([]);
+        $user->masterProfile()->create([])->approve();
 
         $response = $this->getJson('/api/masters');
 

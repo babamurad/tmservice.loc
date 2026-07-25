@@ -11,6 +11,7 @@ class MasterLinkController extends Controller
     {
         $master = MasterProfile::with(['city', 'category', 'user', 'portfolioImages'])
             ->whereHas('user', fn ($q) => $q->whereNotNull('phone_verified_at'))
+            ->where('moderation_status', 'approved')
             ->find($id);
 
         return response()->view('master-link', [

@@ -20,6 +20,7 @@ class MasterLinkTest extends TestCase
         $city = City::create(['name_ru' => 'Туркменабад', 'name_tm' => 'Türkmenabat']);
         $category = Category::create(['name_ru' => 'Электрик', 'name_tm' => 'Elektrik']);
         $master = $user->masterProfile()->create(['city_id' => $city->id, 'category_id' => $category->id, 'bio' => 'Опытный электрик']);
+        $master->approve();
 
         $response = $this->get("/m/{$master->id}");
 
@@ -32,11 +33,23 @@ class MasterLinkTest extends TestCase
     {
         $user = User::create(['phone' => '+993630000021', 'password' => Hash::make('secret123'), 'role' => 'master']);
         $master = $user->masterProfile()->create([]);
+        $master->approve();
 
         $response = $this->get("/m/{$master->id}");
 
         $response->assertStatus(404);
         $response->assertSee('Мастер не найден');
+    }
+
+    public function test_master_link_page_returns_404_for_pending_master(): void
+    {
+        $user = User::create(['phone' => '+993630000022', 'password' => Hash::make('secret123'), 'role' => 'master']);
+        $user->markPhoneAsVerified();
+        $master = $user->masterProfile()->create([]);
+
+        $response = $this->get("/m/{$master->id}");
+
+        $response->assertStatus(404);
     }
 
     public function test_master_link_page_returns_404_for_unknown_id(): void

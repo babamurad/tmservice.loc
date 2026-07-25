@@ -17,7 +17,7 @@ class MasterSearchTest extends TestCase
     {
         $user = User::create(['phone' => $phone, 'password' => Hash::make('secret123'), 'role' => 'master']);
         $user->markPhoneAsVerified();
-        $user->masterProfile()->create($profile);
+        $user->masterProfile()->create($profile)->approve();
     }
 
     public function test_search_matches_bio(): void
