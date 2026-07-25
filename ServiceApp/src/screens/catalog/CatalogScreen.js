@@ -7,7 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import { api } from '../../api/client';
+import { fetchDirectory, getCachedDirectory } from '../../api/directoryCache';
 
 export default function CatalogScreen({ navigation }) {
   const [cities, setCities] = useState([]);
@@ -16,14 +16,26 @@ export default function CatalogScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadData();
+    loadFromCache();
+    refreshFromServer();
   }, []);
 
-  async function loadData() {
+  async function loadFromCache() {
+    const [citiesCache, categoriesCache] = await Promise.all([
+      getCachedDirectory('cities'),
+      getCachedDirectory('categories'),
+    ]);
+
+    if (citiesCache) setCities(citiesCache);
+    if (categoriesCache) setCategories(categoriesCache);
+    if (citiesCache || categoriesCache) setLoading(false);
+  }
+
+  async function refreshFromServer() {
     try {
       const [citiesData, categoriesData] = await Promise.all([
-        api('/cities'),
-        api('/categories'),
+        fetchDirectory('/cities', 'cities'),
+        fetchDirectory('/categories', 'categories'),
       ]);
       setCities(citiesData);
       setCategories(categoriesData);

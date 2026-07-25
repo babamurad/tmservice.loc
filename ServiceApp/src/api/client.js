@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 
-const API_BASE = 'https://tmservice.loc/api';
+export const API_BASE = 'https://tmservice.loc/api';
 
 export async function api(endpoint, options = {}) {
   const token = await SecureStore.getItemAsync('token');
