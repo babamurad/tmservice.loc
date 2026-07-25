@@ -1,9 +1,9 @@
-import * as SecureStore from 'expo-secure-store';
+import { getItemAsync } from '../utils/storage';
 
 export const API_BASE = 'https://tmservice.loc/api';
 
 export async function api(endpoint, options = {}) {
-  const token = await SecureStore.getItemAsync('token');
+  const token = await getItemAsync('token');
 
   const headers = {
     'Content-Type': 'application/json',
@@ -29,7 +29,7 @@ export async function api(endpoint, options = {}) {
 }
 
 export async function apiUpload(endpoint, formData) {
-  const token = await SecureStore.getItemAsync('token');
+  const token = await getItemAsync('token');
 
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext, useContext } from 'react';
-import * as SecureStore from 'expo-secure-store';
+import * as storage from '../utils/storage';
 import { api } from '../api/client';
 
 const AuthContext = createContext(null);
@@ -14,13 +14,13 @@ export function AuthProvider({ children }) {
 
   async function restoreToken() {
     try {
-      const token = await SecureStore.getItemAsync('token');
+      const token = await storage.getItemAsync('token');
       if (token) {
         const me = await api('/me');
         setUser(me);
       }
     } catch {
-      await SecureStore.deleteItemAsync('token');
+      await storage.deleteItemAsync('token');
     } finally {
       setLoading(false);
     }
@@ -31,7 +31,7 @@ export function AuthProvider({ children }) {
       method: 'POST',
       body: JSON.stringify({ phone, password }),
     });
-    await SecureStore.setItemAsync('token', data.token);
+    await storage.setItemAsync('token', data.token);
     setUser(data.user);
     return data;
   }
@@ -41,7 +41,7 @@ export function AuthProvider({ children }) {
       method: 'POST',
       body: JSON.stringify({ phone, password, role }),
     });
-    await SecureStore.setItemAsync('token', data.token);
+    await storage.setItemAsync('token', data.token);
     setUser(data.user);
     return data;
   }
@@ -52,7 +52,7 @@ export function AuthProvider({ children }) {
     } catch {
       // ignore
     }
-    await SecureStore.deleteItemAsync('token');
+    await storage.deleteItemAsync('token');
     setUser(null);
   }
 

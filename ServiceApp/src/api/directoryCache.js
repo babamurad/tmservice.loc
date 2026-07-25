@@ -1,16 +1,17 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getItemAsync, setItemAsync } from '../utils/storage';
 import { API_BASE } from './client';
 
-const dataKey = (cacheKey) => `directory:data:${cacheKey}`;
-const etagKey = (cacheKey) => `directory:etag:${cacheKey}`;
+const sanitizeKey = (key) => key.replace(/[^a-zA-Z0-9._-]/g, '_');
+const dataKey = (cacheKey) => sanitizeKey(`directory_data_${cacheKey}`);
+const etagKey = (cacheKey) => sanitizeKey(`directory_etag_${cacheKey}`);
 
 export async function getCachedDirectory(cacheKey) {
-  const raw = await AsyncStorage.getItem(dataKey(cacheKey));
+  const raw = await getItemAsync(dataKey(cacheKey));
   return raw ? JSON.parse(raw) : null;
 }
 
 export async function fetchDirectory(endpoint, cacheKey) {
-  const etag = await AsyncStorage.getItem(etagKey(cacheKey));
+  const etag = await getItemAsync(etagKey(cacheKey));
 
   const res = await fetch(`${API_BASE}${endpoint}`, {
     headers: etag ? { 'If-None-Match': etag } : {},
@@ -31,10 +32,11 @@ export async function fetchDirectory(endpoint, cacheKey) {
   const data = await res.json();
   const newEtag = res.headers.get('ETag');
 
-  await AsyncStorage.setItem(dataKey(cacheKey), JSON.stringify(data));
+  await setItemAsync(dataKey(cacheKey), JSON.stringify(data));
   if (newEtag) {
-    await AsyncStorage.setItem(etagKey(cacheKey), newEtag);
+    await setItemAsync(etagKey(cacheKey), newEtag);
   }
 
   return data;
 }
+
