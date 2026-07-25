@@ -22,7 +22,7 @@
 - ✅ `DirectoryController`, `MasterController`, `ProfileController` — базовый CRUD, кэш справочников.
 - ✅ Генерация QR (endroid/qr-code), сжатие фото (Intervention Image → webp).
 - ✅ Мобильное приложение: Expo 56 / RN 0.85 / React Navigation 7, ~10 экранов уже написаны (auth, catalog, masters list/detail, profile, search, QR).
-- 🔴 **Живая уязвимость**: `POST /api/register` принимает `role` из тела запроса, включая `admin` — любой может зарегистрироваться администратором. См. `01-backend.md`, П0.
+- ✅ **П0 закрыт**: `POST /api/register` больше не принимает `role=admin` от клиента — валидация вынесена в `RegisterRequest` (`in:client,master`), роль `admin` теперь выдаётся только через `php artisan make:admin {phone}`. Покрыто тестами (`tests/Feature/RegisterRoleTest.php`). См. `01-backend.md`, П0.
 - ⛔ Ещё не сделано: OTP-верификация телефона, rate limiting, модерация мастеров, админка, отзывы/рейтинги, QR через https-домен вместо `appscheme://`, офлайн-персист в мобильном приложении.
 
 ## Принятые решения (с обоснованием)

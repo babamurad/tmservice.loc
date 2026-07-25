@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RegisterRequest;
 use App\Models\MasterProfile;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -11,13 +12,9 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function register(Request $request): JsonResponse
+    public function register(RegisterRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'phone' => 'required|string|unique:users,phone',
-            'password' => 'required|string|min:6',
-            'role' => 'required|string|in:admin,master,client',
-        ]);
+        $validated = $request->validated();
 
         $user = User::create([
             'phone' => $validated['phone'],
