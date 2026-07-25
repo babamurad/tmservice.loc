@@ -135,16 +135,25 @@ cooldown, успешная верификация, неверный код (сч
 ничего не делает. Для QR, чей смысл — привлекать новых клиентов, это
 провал сценария.
 
-- [ ] Шаг 4A.1: QR кодирует `https://{домен}/m/{id}` вместо кастомной схемы.
-- [ ] Шаг 4A.2: Веб-страница `/m/{id}` (единственное исключение из
-  «только JSON» — можно Blade): если приложение установлено → ОС сама
-  откроет его; если нет → карточка мастера + кнопки «Открыть в приложении /
-  App Store / Google Play».
-- [ ] Шаг 4A.3: Файлы ассоциации доменов:
-  - iOS: `https://{домен}/.well-known/apple-app-site-association` (без расширения, `Content-Type: application/json`).
-  - Android: `https://{домен}/.well-known/assetlinks.json`.
+- [x] Шаг 4A.1: QR кодирует `route('master.link', $id)` (`https://{домен}/m/{id}`, `APP_URL` из `.env`) вместо `appscheme://` — `ProfileController@generateQr`.
+- [x] Шаг 4A.2: Веб-страница `/m/{id}` (`MasterLinkController`, `resources/views/master-link.blade.php`) — единственное исключение из «только JSON». Показывает категорию, город, био, портфолио, кнопку «Позвонить» (`tel:`) и кнопки App Store/Google Play. Отдаёт `404` с той же страницей, если мастер не найден или не прошёл верификацию телефона (та же фильтрация `phone_verified_at`, что и в публичном API).
+- [~] Шаг 4A.3: Файлы ассоциации доменов — эндпоинты готовы (`DeepLinkController`, `routes/web.php`):
+  - `GET /.well-known/apple-app-site-association` — `Content-Type: application/json`, но `details: []` пока не заполнены `APPLE_TEAM_ID`/`APPLE_APP_BUNDLE_ID` в `.env` (реального Team ID/bundle id ещё нет — приложение не подавали в App Store Connect).
+  - `GET /.well-known/assetlinks.json` — пустой массив `[]`, пока не заполнен `ANDROID_SHA256_CERT_FINGERPRINTS` (сертификат подписи появится при первой сборке релиза).
+  - Значения читаются из `config/deeplink.php` → заполнить в `.env` без изменения кода, когда появятся реальные идентификаторы (см. `02-mobile.md`, Этап 6).
 
-**Критерии приёмки**: скан QR с приложением → открывается `MasterDetailScreen` нужного мастера. Без приложения → веб-страница с переходом в стор.
+Покрыто тестами: `tests/Feature/MasterLinkTest.php` (страница мастера,
+404 для неверифицированного/несуществующего, оба `.well-known`-эндпоинта),
+`tests/Feature/GenerateQrTest.php` (QR генерируется и сохраняется).
+Полный набор тестов (`php artisan test`) — зелёный (22/22).
+
+**Критерии приёмки**: скан QR с приложением → должно открыться `MasterDetailScreen`
+нужного мастера **после того, как в `02-mobile.md` Этап 6 подключат
+`associatedDomains`/`intentFilters`** — сама Universal Links активация не
+входит в этот этап, она требует заполненных `APPLE_TEAM_ID`/`ANDROID_SHA256_CERT_FINGERPRINTS`
+(см. Шаг 4A.3) и настройки на стороне Expo-приложения. Без приложения →
+веб-страница `/m/{id}` с карточкой мастера — ✅ работает уже сейчас, кнопки
+в сторы появятся при заполнении `APP_STORE_URL`/`PLAY_STORE_URL`.
 
 ---
 
@@ -220,6 +229,6 @@ cooldown, успешная верификация, неверный код (сч
 | Этап 2A (OTP) | Реализован на `LogSmsGateway` — спайк реального SMS-шлюза ещё нужен перед запуском | Публичный запуск (пока нет реального провайдера, реальные SMS не уходят) |
 | Этап 2B (rate limiting) | — | Публичный запуск |
 | Этап 1.2.1 (parent_city_id) | — | Мобильный UI выбора города (`02-mobile.md`) |
-| Этап 4A (QR https) | Домен сервиса, Expo `app.json` (см. `02-mobile.md`) | Полноценный сценарий QR |
+| Этап 4A (QR https) | Реализован; для активации Universal Links нужны `APPLE_TEAM_ID`/`ANDROID_SHA256_CERT_FINGERPRINTS` в `.env` + Expo `app.json` (см. `02-mobile.md`, Этап 6) | Полноценный сценарий QR (сейчас работает только веб-фолбэк) |
 | Этап 5 (админка) | — | Этап 5.4 (модерация), инвалидация кэша Шаг 3.1.1 |
 | Этап 8 (отзывы) | Этап 2A (нужен verified client) | — |

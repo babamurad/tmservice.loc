@@ -70,17 +70,17 @@ class ProfileController extends Controller
         ]);
 
         $file = $request->file('image');
-        $filename = uniqid('portfolio_') . '.webp';
+        $filename = uniqid('portfolio_').'.webp';
 
         $image = Image::read($file->getRealPath());
         $image->resize(width: 1200, height: 1200);
         $encoded = $image->toWebp(quality: 80);
 
-        Storage::disk('public')->put('portfolio/' . $filename, $encoded);
+        Storage::disk('public')->put('portfolio/'.$filename, $encoded);
 
         $portfolioImage = PortfolioImage::create([
             'master_profile_id' => $profile->id,
-            'image_path' => 'portfolio/' . $filename,
+            'image_path' => 'portfolio/'.$filename,
         ]);
 
         return response()->json($portfolioImage, 201);
@@ -94,18 +94,18 @@ class ProfileController extends Controller
             return response()->json(['message' => 'Профиль не найден.'], 404);
         }
 
-        $filename = 'qr_master_' . $profile->id . '.png';
+        $filename = 'qr_master_'.$profile->id.'.png';
 
-        $qrCode = new QrCode('appscheme://master/' . $profile->id);
-        $writer = new PngWriter();
+        $qrCode = new QrCode(route('master.link', $profile->id));
+        $writer = new PngWriter;
         $result = $writer->write($qrCode);
 
-        Storage::disk('public')->put('qr/' . $filename, $result->getString());
+        Storage::disk('public')->put('qr/'.$filename, $result->getString());
 
-        $profile->update(['qr_code_path' => 'qr/' . $filename]);
+        $profile->update(['qr_code_path' => 'qr/'.$filename]);
 
         return response()->json([
-            'qr_code_url' => asset('storage/qr/' . $filename),
+            'qr_code_url' => asset('storage/qr/'.$filename),
         ]);
     }
 }
