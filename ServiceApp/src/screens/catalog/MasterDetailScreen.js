@@ -1,19 +1,15 @@
 import { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  FlatList,
-  TouchableOpacity,
-  TextInput,
-  StyleSheet,
-  ActivityIndicator,
-  Linking,
-  Alert,
-} from 'react-native';
+import { View, Text, Image, FlatList, StyleSheet, ActivityIndicator, Linking, Alert } from 'react-native';
 import { api } from '../../api/client';
 import { useAuth } from '../../hooks/useAuth';
-import { renderStars } from '../../utils/rating';
+import ScreenContainer from '../../components/ScreenContainer';
+import Card from '../../components/Card';
+import Avatar from '../../components/Avatar';
+import StatusBadge from '../../components/StatusBadge';
+import RatingStars from '../../components/RatingStars';
+import Button from '../../components/Button';
+import TextField from '../../components/TextField';
+import { colors, spacing, typography } from '../../theme';
 
 export default function MasterDetailScreen({ route }) {
   const { master } = route.params;
@@ -86,209 +82,126 @@ export default function MasterDetailScreen({ route }) {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
-      </View>
+      <ScreenContainer style={styles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </ScreenContainer>
     );
   }
 
   if (!detail) {
     return (
-      <View style={styles.center}>
-        <Text>Ошибка загрузки</Text>
-      </View>
+      <ScreenContainer style={styles.center}>
+        <Text style={typography.body}>Ошибка загрузки</Text>
+      </ScreenContainer>
     );
   }
 
   return (
-    <FlatList
-      data={detail.portfolio_images}
-      contentContainerStyle={styles.container}
-      ListHeaderComponent={
-        <>
-          <View style={styles.header}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {(detail.user?.phone || 'M')[0].toUpperCase()}
-              </Text>
-            </View>
-            <View style={styles.headerInfo}>
-              <Text style={styles.name}>{detail.user?.phone}</Text>
-              <View style={styles.statusRow}>
-                <View
-                  style={[
-                    styles.dot,
-                    { backgroundColor: detail.is_free ? '#34C759' : '#FF3B30' },
-                  ]}
-                />
-                <Text style={styles.statusText}>
-                  {detail.is_free ? 'Свободен' : 'Занят'}
-                </Text>
+    <ScreenContainer>
+      <FlatList
+        data={detail.portfolio_images}
+        contentContainerStyle={styles.container}
+        ListHeaderComponent={
+          <>
+            <View style={styles.header}>
+              <Avatar phone={detail.user?.phone} size={64} />
+              <View style={styles.headerInfo}>
+                <Text style={typography.title}>{detail.user?.phone}</Text>
+                <View style={styles.statusRow}>
+                  <StatusBadge isFree={detail.is_free} />
+                </View>
+                {detail.reviews_count > 0 && (
+                  <RatingStars rating={detail.avg_rating} reviewsCount={detail.reviews_count} />
+                )}
+                {detail.city && <Text style={typography.caption}>📍 {detail.city.name_ru}</Text>}
+                {detail.category && <Text style={typography.caption}>📋 {detail.category.name_ru}</Text>}
               </View>
-              {detail.reviews_count > 0 && (
-                <Text style={styles.rating}>
-                  {renderStars(detail.avg_rating)} {detail.avg_rating} ({detail.reviews_count})
-                </Text>
-              )}
-              {detail.city && <Text style={styles.meta}>📍 {detail.city.name_ru}</Text>}
-              {detail.category && (
-                <Text style={styles.meta}>📋 {detail.category.name_ru}</Text>
-              )}
             </View>
-          </View>
 
-          {detail.bio && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>О себе</Text>
-              <Text style={styles.bio}>{detail.bio}</Text>
-            </View>
-          )}
-
-          {detail.portfolio_images?.length > 0 && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Портфолио</Text>
-            </View>
-          )}
-        </>
-      }
-      renderItem={({ item }) => (
-        <Image
-          source={{ uri: `https://tmservice.loc/storage/${item.image_path}` }}
-          style={styles.portfolioImage}
-          resizeMode="cover"
-        />
-      )}
-      keyExtractor={(item) => String(item.id)}
-      ListFooterComponent={
-        <>
-          <TouchableOpacity style={styles.callButton} onPress={handleCall}>
-            <Text style={styles.callButtonText}>Позвонить</Text>
-          </TouchableOpacity>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Отзывы</Text>
-
-            {reviewsLoading ? (
-              <ActivityIndicator />
-            ) : reviews.length === 0 ? (
-              <Text style={styles.meta}>Пока нет отзывов</Text>
-            ) : (
-              reviews.map((review) => (
-                <View key={review.id} style={styles.reviewItem}>
-                  <Text style={styles.rating}>{renderStars(review.rating)}</Text>
-                  {review.comment && <Text style={styles.bio}>{review.comment}</Text>}
-                </View>
-              ))
-            )}
-
-            {canReview && (
-              <View style={styles.reviewForm}>
-                <Text style={styles.sectionTitle}>Оставить отзыв</Text>
-                <View style={styles.starPicker}>
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <TouchableOpacity key={value} onPress={() => setRatingInput(value)}>
-                      <Text style={styles.starPickerIcon}>
-                        {value <= ratingInput ? '★' : '☆'}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                <TextInput
-                  style={styles.commentInput}
-                  placeholder="Комментарий (необязательно)"
-                  value={commentInput}
-                  onChangeText={setCommentInput}
-                  multiline
-                  numberOfLines={3}
-                />
-                <TouchableOpacity
-                  style={styles.submitReviewButton}
-                  onPress={submitReview}
-                  disabled={submitting}
-                >
-                  {submitting ? (
-                    <ActivityIndicator color="#fff" />
-                  ) : (
-                    <Text style={styles.submitReviewButtonText}>Отправить</Text>
-                  )}
-                </TouchableOpacity>
+            {detail.bio && (
+              <View style={styles.section}>
+                <Text style={[typography.heading, styles.sectionTitle]}>О себе</Text>
+                <Text style={typography.body}>{detail.bio}</Text>
               </View>
             )}
-          </View>
-        </>
-      }
-    />
+
+            {detail.portfolio_images?.length > 0 && (
+              <View style={styles.section}>
+                <Text style={[typography.heading, styles.sectionTitle]}>Портфолио</Text>
+              </View>
+            )}
+          </>
+        }
+        renderItem={({ item }) => (
+          <Image
+            source={{ uri: `https://tmservice.loc/storage/${item.image_path}` }}
+            style={styles.portfolioImage}
+            resizeMode="cover"
+          />
+        )}
+        keyExtractor={(item) => String(item.id)}
+        ListFooterComponent={
+          <>
+            <Button title="Позвонить" icon="call" variant="success" onPress={handleCall} style={styles.callButton} />
+
+            <View style={styles.section}>
+              <Text style={[typography.heading, styles.sectionTitle]}>Отзывы</Text>
+
+              {reviewsLoading ? (
+                <ActivityIndicator color={colors.primary} />
+              ) : reviews.length === 0 ? (
+                <Text style={typography.bodyMuted}>Пока нет отзывов</Text>
+              ) : (
+                reviews.map((review) => (
+                  <Card key={review.id} style={styles.reviewItem}>
+                    <RatingStars rating={review.rating} size={14} />
+                    {review.comment && (
+                      <Text style={[typography.body, styles.reviewComment]}>{review.comment}</Text>
+                    )}
+                  </Card>
+                ))
+              )}
+
+              {canReview && (
+                <Card style={styles.reviewForm}>
+                  <Text style={[typography.heading, styles.sectionTitle]}>Оставить отзыв</Text>
+                  <RatingStars rating={ratingInput} interactive onChange={setRatingInput} size={18} />
+                  <TextField
+                    style={styles.commentInput}
+                    placeholder="Комментарий (необязательно)"
+                    value={commentInput}
+                    onChangeText={setCommentInput}
+                    multiline
+                    numberOfLines={3}
+                  />
+                  <Button title="Отправить" icon="send" onPress={submitReview} loading={submitting} />
+                </Card>
+              )}
+            </View>
+          </>
+        }
+      />
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  container: { padding: 16 },
-  header: { flexDirection: 'row', marginBottom: 20 },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  avatarText: { fontSize: 24, color: '#fff', fontWeight: '700' },
-  headerInfo: { flex: 1, justifyContent: 'center' },
-  name: { fontSize: 20, fontWeight: '700', marginBottom: 4 },
-  statusRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4, gap: 6 },
-  dot: { width: 10, height: 10, borderRadius: 5 },
-  statusText: { fontSize: 14, color: '#666' },
-  rating: { fontSize: 14, color: '#f5a623', marginBottom: 4 },
-  meta: { fontSize: 13, color: '#999', marginTop: 2 },
-  section: { marginBottom: 20 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: 8 },
-  bio: { fontSize: 15, color: '#333', lineHeight: 22 },
+  center: { justifyContent: 'center', alignItems: 'center' },
+  container: { padding: spacing.lg },
+  header: { flexDirection: 'row', marginBottom: spacing.xl, gap: spacing.lg },
+  headerInfo: { flex: 1, justifyContent: 'center', gap: spacing.xs },
+  statusRow: { marginVertical: 2 },
+  section: { marginBottom: spacing.xl },
+  sectionTitle: { marginBottom: spacing.md },
   portfolioImage: {
     width: '100%',
     height: 200,
     borderRadius: 12,
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
-  callButton: {
-    backgroundColor: '#34C759',
-    padding: 18,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 12,
-    marginBottom: 30,
-  },
-  callButtonText: { color: '#fff', fontSize: 18, fontWeight: '700' },
-  reviewItem: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    paddingBottom: 10,
-    marginBottom: 10,
-  },
-  reviewForm: {
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-  },
-  starPicker: { flexDirection: 'row', gap: 6, marginBottom: 10 },
-  starPickerIcon: { fontSize: 28, color: '#f5a623' },
-  commentInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 10,
-    backgroundColor: '#fff',
-    fontSize: 14,
-    marginBottom: 10,
-    textAlignVertical: 'top',
-  },
-  submitReviewButton: {
-    backgroundColor: '#007AFF',
-    padding: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  submitReviewButtonText: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  callButton: { marginTop: spacing.md, marginBottom: spacing.xxl },
+  reviewItem: { marginBottom: spacing.sm, gap: spacing.xs },
+  reviewComment: { marginTop: spacing.xs },
+  reviewForm: { marginTop: spacing.md },
+  commentInput: { marginTop: spacing.md, minHeight: 70, textAlignVertical: 'top' },
 });

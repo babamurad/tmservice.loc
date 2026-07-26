@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { api } from '../../api/client';
+import ScreenContainer from '../../components/ScreenContainer';
+import Card from '../../components/Card';
+import { colors, spacing, typography } from '../../theme';
 
 export default function MyQRScreen({ route }) {
   const { profile } = route.params;
@@ -37,35 +34,29 @@ export default function MyQRScreen({ route }) {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
-      </View>
+      <ScreenContainer style={styles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </ScreenContainer>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.hint}>Отсканируйте QR-код, чтобы открыть профиль</Text>
+    <ScreenContainer style={styles.center}>
+      <Text style={[typography.bodyMuted, styles.hint]}>
+        Отсканируйте QR-код, чтобы открыть профиль
+      </Text>
       {qrUrl && (
-        <Image
-          source={{ uri: qrUrl }}
-          style={styles.qrImage}
-          resizeMode="contain"
-        />
+        <Card style={styles.qrCard}>
+          <Image source={{ uri: qrUrl }} style={styles.qrImage} resizeMode="contain" />
+        </Card>
       )}
-    </View>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 40,
-  },
-  hint: { fontSize: 16, color: '#666', marginBottom: 30, textAlign: 'center' },
-  qrImage: { width: 280, height: 280 },
+  center: { justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
+  hint: { marginBottom: spacing.xl, textAlign: 'center' },
+  qrCard: { padding: spacing.xl },
+  qrImage: { width: 240, height: 240 },
 });

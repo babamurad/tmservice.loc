@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import { api } from '../../api/client';
 import { getCachedDirectory } from '../../api/directoryCache';
-import { renderStars } from '../../utils/rating';
+import ScreenContainer from '../../components/ScreenContainer';
+import Card from '../../components/Card';
+import Chip from '../../components/Chip';
+import TextField from '../../components/TextField';
+import Button from '../../components/Button';
+import CategoryIcon from '../../components/CategoryIcon';
+import StatusBadge from '../../components/StatusBadge';
+import RatingStars from '../../components/RatingStars';
+import EmptyState from '../../components/EmptyState';
+import { colors, spacing, typography } from '../../theme';
 
 export default function SearchScreen({ navigation }) {
   const [query, setQuery] = useState('');
@@ -68,28 +69,22 @@ export default function SearchScreen({ navigation }) {
   }
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Например: сантехник, ремонт крана"
-        value={query}
-        onChangeText={setQuery}
-        onSubmitEditing={runSearch}
-        returnKeyType="search"
-      />
+    <ScreenContainer>
+      <View style={styles.searchBar}>
+        <TextField
+          style={styles.searchInput}
+          placeholder="Например: сантехник, ремонт крана"
+          value={query}
+          onChangeText={setQuery}
+          onSubmitEditing={runSearch}
+          returnKeyType="search"
+        />
+      </View>
 
       {cities.length > 0 && (
         <View style={styles.filterRow}>
           {cities.map((city) => (
-            <TouchableOpacity
-              key={city.id}
-              style={[styles.chip, selectedCity === city.id && styles.chipActive]}
-              onPress={() => toggleCity(city.id)}
-            >
-              <Text style={[styles.chipText, selectedCity === city.id && styles.chipTextActive]}>
-                {city.name_ru}
-              </Text>
-            </TouchableOpacity>
+            <Chip key={city.id} label={city.name_ru} active={selectedCity === city.id} onPress={() => toggleCity(city.id)} />
           ))}
         </View>
       )}
@@ -97,124 +92,72 @@ export default function SearchScreen({ navigation }) {
       {categories.length > 0 && (
         <View style={styles.filterRow}>
           {categories.map((category) => (
-            <TouchableOpacity
+            <Chip
               key={category.id}
-              style={[styles.chip, selectedCategory === category.id && styles.chipActive]}
+              label={category.name_ru}
+              active={selectedCategory === category.id}
               onPress={() => toggleCategory(category.id)}
-            >
-              <Text style={[styles.chipText, selectedCategory === category.id && styles.chipTextActive]}>
-                {category.name_ru}
-              </Text>
-            </TouchableOpacity>
+            />
           ))}
         </View>
       )}
 
-      <TouchableOpacity style={styles.searchButton} onPress={runSearch}>
-        <Text style={styles.searchButtonText}>Найти</Text>
-      </TouchableOpacity>
+      <Button title="Найти" icon="search" onPress={runSearch} style={styles.searchButton} />
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <FlatList
           data={results}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.card}
-              onPress={() => navigation.navigate('MasterDetail', { master: item })}
-            >
+            <Card style={styles.card} onPress={() => navigation.navigate('MasterDetail', { master: item })}>
               <View style={styles.cardHeader}>
-                <Text style={styles.name}>{item.category?.name_ru || 'Мастер'}</Text>
-                <View
-                  style={[styles.dot, { backgroundColor: item.is_free ? '#34C759' : '#FF3B30' }]}
-                />
+                <CategoryIcon category={item.category} size={20} />
+                <View style={styles.cardHeaderInfo}>
+                  <Text style={typography.heading}>{item.category?.name_ru || 'Мастер'}</Text>
+                  {item.reviews_count > 0 && (
+                    <RatingStars rating={item.avg_rating} reviewsCount={item.reviews_count} size={13} />
+                  )}
+                </View>
+                <StatusBadge isFree={item.is_free} compact />
               </View>
-              {item.reviews_count > 0 && (
-                <Text style={styles.rating}>
-                  {renderStars(item.avg_rating)} ({item.reviews_count})
-                </Text>
-              )}
-              <Text style={styles.bio} numberOfLines={2}>
+              <Text style={[typography.bodyMuted, styles.bio]} numberOfLines={2}>
                 {item.bio || 'Нет описания'}
               </Text>
-              {item.city && <Text style={styles.meta}>📍 {item.city.name_ru}</Text>}
-            </TouchableOpacity>
+              {item.city && <Text style={typography.caption}>📍 {item.city.name_ru}</Text>}
+            </Card>
           )}
           keyExtractor={(item) => String(item.id)}
           ListEmptyComponent={
             searched ? (
-              <View style={styles.center}>
-                <Text style={styles.empty}>Ничего не найдено</Text>
-              </View>
-            ) : null
+              <EmptyState icon="search-outline" title="Ничего не найдено" subtitle="Попробуйте изменить запрос или фильтры" />
+            ) : (
+              <EmptyState icon="search" title="Найдите нужного мастера" subtitle="Введите запрос или выберите город и категорию" />
+            )
           }
         />
       )}
-    </View>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 40 },
-  input: {
-    margin: 12,
-    marginBottom: 8,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    fontSize: 15,
-  },
-  filterRow: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, gap: 8, marginBottom: 4 },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  chipActive: { backgroundColor: '#007AFF', borderColor: '#007AFF' },
-  chipText: { fontSize: 13, color: '#333' },
-  chipTextActive: { color: '#fff' },
-  searchButton: {
-    marginHorizontal: 12,
-    marginVertical: 12,
-    backgroundColor: '#007AFF',
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  searchButtonText: { color: '#fff', fontSize: 15, fontWeight: '600' },
-  list: { padding: 12, paddingTop: 0 },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
+  searchBar: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg },
+  searchInput: { marginBottom: 0 },
+  filterRow: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.lg, gap: spacing.sm, marginBottom: spacing.sm },
+  searchButton: { marginHorizontal: spacing.lg, marginVertical: spacing.md },
+  list: { padding: spacing.lg, paddingTop: 0 },
+  card: { marginBottom: spacing.md },
   cardHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    gap: spacing.md,
+    marginBottom: spacing.sm,
   },
-  name: { fontSize: 16, fontWeight: '600' },
-  dot: { width: 12, height: 12, borderRadius: 6 },
-  rating: { fontSize: 13, color: '#f5a623', marginBottom: 4 },
-  bio: { fontSize: 14, color: '#666', marginBottom: 6 },
-  meta: { fontSize: 12, color: '#999' },
-  empty: { fontSize: 16, color: '#999' },
+  cardHeaderInfo: { flex: 1, gap: 2 },
+  bio: { marginBottom: spacing.xs },
 });

@@ -1,14 +1,11 @@
 import { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { useAuth } from '../../hooks/useAuth';
+import ScreenContainer from '../../components/ScreenContainer';
+import TextField from '../../components/TextField';
+import Chip from '../../components/Chip';
+import Button from '../../components/Button';
+import { colors, spacing, typography } from '../../theme';
 
 const ROLES = [
   { label: 'Клиент', value: 'client' },
@@ -38,88 +35,52 @@ export default function RegisterScreen({ navigation }) {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Регистрация</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Телефон"
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Пароль"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <Text style={styles.label}>Роль</Text>
-      <View style={styles.roleRow}>
-        {ROLES.map((r) => (
-          <TouchableOpacity
-            key={r.value}
-            style={[styles.roleBtn, role === r.value && styles.roleBtnActive]}
-            onPress={() => setRole(r.value)}
-          >
-            <Text
-              style={[styles.roleText, role === r.value && styles.roleTextActive]}
-            >
-              {r.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleRegister}
-        disabled={loading}
+    <ScreenContainer>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Зарегистрироваться</Text>
-        )}
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.goBack()}>
-        <Text style={styles.link}>Уже есть аккаунт? Войти</Text>
-      </TouchableOpacity>
-    </View>
+        <View style={styles.container}>
+          <Text style={[typography.display, styles.title]}>Регистрация</Text>
+
+          <TextField
+            placeholder="Телефон"
+            value={phone}
+            onChangeText={setPhone}
+            keyboardType="phone-pad"
+            autoCapitalize="none"
+          />
+          <TextField
+            placeholder="Пароль"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+
+          <Text style={[typography.caption, styles.roleLabel]}>Роль</Text>
+          <View style={styles.roleRow}>
+            {ROLES.map((r) => (
+              <Chip key={r.value} label={r.label} active={role === r.value} onPress={() => setRole(r.value)} />
+            ))}
+          </View>
+
+          <Button title="Зарегистрироваться" onPress={handleRegister} loading={loading} style={styles.button} />
+
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Text style={styles.link}>Уже есть аккаунт? Войти</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 20 },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 30, textAlign: 'center' },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 14,
-    marginBottom: 14,
-    fontSize: 16,
-  },
-  label: { fontSize: 16, marginBottom: 8 },
-  roleRow: { flexDirection: 'row', marginBottom: 20, gap: 10 },
-  roleBtn: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    alignItems: 'center',
-  },
-  roleBtnActive: { backgroundColor: '#007AFF', borderColor: '#007AFF' },
-  roleText: { fontSize: 14, color: '#333' },
-  roleTextActive: { color: '#fff' },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  link: { color: '#007AFF', textAlign: 'center', fontSize: 14 },
+  flex: { flex: 1 },
+  container: { flex: 1, justifyContent: 'center', padding: spacing.xl },
+  title: { textAlign: 'center', marginBottom: spacing.xxl },
+  roleLabel: { marginBottom: spacing.sm },
+  roleRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.xxl },
+  button: { marginBottom: spacing.lg },
+  link: { color: colors.primary, textAlign: 'center', fontSize: 14, fontWeight: '600' },
 });

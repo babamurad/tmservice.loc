@@ -1,15 +1,10 @@
 import { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
-  ScrollView,
-} from 'react-native';
+import { ScrollView, Alert } from 'react-native';
 import { api } from '../../api/client';
+import ScreenContainer from '../../components/ScreenContainer';
+import TextField from '../../components/TextField';
+import Button from '../../components/Button';
+import { spacing } from '../../theme';
 
 export default function EditProfileScreen({ route, navigation }) {
   const { profile } = route.params;
@@ -39,63 +34,36 @@ export default function EditProfileScreen({ route, navigation }) {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.label}>О себе</Text>
-      <TextInput
-        style={styles.input}
-        value={bio}
-        onChangeText={setBio}
-        multiline
-        numberOfLines={4}
-        placeholder="Расскажите о себе"
-      />
+    <ScreenContainer>
+      <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
+        <TextField
+          label="О себе"
+          value={bio}
+          onChangeText={setBio}
+          multiline
+          numberOfLines={4}
+          placeholder="Расскажите о себе"
+          style={{ minHeight: 90, textAlignVertical: 'top' }}
+        />
 
-      <Text style={styles.label}>ID города (city_id)</Text>
-      <TextInput
-        style={styles.input}
-        value={cityId}
-        onChangeText={setCityId}
-        keyboardType="numeric"
-        placeholder="1 — Туркменабад, 2 — Ашхабад..."
-      />
+        <TextField
+          label="ID города (city_id)"
+          value={cityId}
+          onChangeText={setCityId}
+          keyboardType="numeric"
+          placeholder="1 — Туркменабад, 2 — Ашхабад..."
+        />
 
-      <Text style={styles.label}>ID категории (category_id)</Text>
-      <TextInput
-        style={styles.input}
-        value={categoryId}
-        onChangeText={setCategoryId}
-        keyboardType="numeric"
-        placeholder="1 — Сантехник, 2 — Электрик..."
-      />
+        <TextField
+          label="ID категории (category_id)"
+          value={categoryId}
+          onChangeText={setCategoryId}
+          keyboardType="numeric"
+          placeholder="1 — Сантехник, 2 — Электрик..."
+        />
 
-      <TouchableOpacity style={styles.button} onPress={handleSave} disabled={loading}>
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Сохранить</Text>
-        )}
-      </TouchableOpacity>
-    </ScrollView>
+        <Button title="Сохранить" onPress={handleSave} loading={loading} style={{ marginTop: spacing.lg }} />
+      </ScrollView>
+    </ScreenContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 16 },
-  label: { fontSize: 14, fontWeight: '600', marginBottom: 6, marginTop: 12 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 6,
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-});

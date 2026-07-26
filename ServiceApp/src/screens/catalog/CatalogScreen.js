@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import { fetchDirectory, getCachedDirectory } from '../../api/directoryCache';
+import ScreenContainer from '../../components/ScreenContainer';
+import Card from '../../components/Card';
+import Chip from '../../components/Chip';
+import CategoryIcon from '../../components/CategoryIcon';
+import { colors, spacing, typography } from '../../theme';
 
 export default function CatalogScreen({ navigation }) {
   const [cities, setCities] = useState([]);
@@ -55,27 +53,22 @@ export default function CatalogScreen({ navigation }) {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
-      </View>
+      <ScreenContainer style={styles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </ScreenContainer>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <ScreenContainer>
       <View style={styles.cityRow}>
         {cities.map((city) => (
-          <TouchableOpacity
+          <Chip
             key={city.id}
-            style={[styles.cityChip, selectedCity === city.id && styles.cityChipActive]}
+            label={city.name_ru}
+            active={selectedCity === city.id}
             onPress={() => setSelectedCity(city.id === selectedCity ? null : city.id)}
-          >
-            <Text
-              style={[styles.cityText, selectedCity === city.id && styles.cityTextActive]}
-            >
-              {city.name_ru}
-            </Text>
-          </TouchableOpacity>
+          />
         ))}
       </View>
 
@@ -85,50 +78,27 @@ export default function CatalogScreen({ navigation }) {
         contentContainerStyle={styles.grid}
         columnWrapperStyle={styles.gridRow}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.categoryCard}
-            onPress={() => navigateToMasters(item)}
-          >
-            <Text style={styles.categoryIcon}>{item.icon_url || '🔧'}</Text>
-            <Text style={styles.categoryName}>{item.name_ru}</Text>
-          </TouchableOpacity>
+          <Card style={styles.categoryCard} onPress={() => navigateToMasters(item)}>
+            <CategoryIcon category={item} size={26} />
+            <Text style={[typography.heading, styles.categoryName]}>{item.name_ru}</Text>
+          </Card>
         )}
         keyExtractor={(item) => String(item.id)}
       />
-    </View>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  cityRow: { flexDirection: 'row', flexWrap: 'wrap', padding: 12, gap: 8 },
-  cityChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  cityChipActive: { backgroundColor: '#007AFF', borderColor: '#007AFF' },
-  cityText: { fontSize: 14, color: '#333' },
-  cityTextActive: { color: '#fff' },
-  grid: { padding: 12 },
-  gridRow: { justifyContent: 'space-between', marginBottom: 12 },
+  center: { justifyContent: 'center', alignItems: 'center' },
+  cityRow: { flexDirection: 'row', flexWrap: 'wrap', padding: spacing.lg, gap: spacing.sm },
+  grid: { padding: spacing.lg },
+  gridRow: { justifyContent: 'space-between', marginBottom: spacing.md },
   categoryCard: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
     alignItems: 'center',
-    marginHorizontal: 4,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    marginHorizontal: spacing.xs,
+    paddingVertical: spacing.xl,
   },
-  categoryIcon: { fontSize: 32, marginBottom: 8 },
-  categoryName: { fontSize: 14, fontWeight: '600', textAlign: 'center' },
+  categoryName: { marginTop: spacing.md, textAlign: 'center' },
 });

@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import { api } from '../../api/client';
-import { renderStars } from '../../utils/rating';
+import ScreenContainer from '../../components/ScreenContainer';
+import Card from '../../components/Card';
+import CategoryIcon from '../../components/CategoryIcon';
+import StatusBadge from '../../components/StatusBadge';
+import RatingStars from '../../components/RatingStars';
+import EmptyState from '../../components/EmptyState';
+import { colors, spacing, typography } from '../../theme';
 
 export default function MastersListScreen({ route, navigation }) {
   const { category, cityId } = route.params;
@@ -39,77 +38,56 @@ export default function MastersListScreen({ route, navigation }) {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
-      </View>
+      <ScreenContainer style={styles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </ScreenContainer>
     );
   }
 
   return (
-    <FlatList
-      data={masters}
-      contentContainerStyle={styles.list}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate('MasterDetail', { master: item })}
-        >
-          <View style={styles.cardHeader}>
-            <Text style={styles.name}>{item.user?.phone || 'Мастер'}</Text>
-            <View
-              style={[
-                styles.dot,
-                { backgroundColor: item.is_free ? '#34C759' : '#FF3B30' },
-              ]}
-            />
-          </View>
-          {item.reviews_count > 0 && (
-            <Text style={styles.rating}>
-              {renderStars(item.avg_rating)} ({item.reviews_count})
+    <ScreenContainer>
+      <FlatList
+        data={masters}
+        contentContainerStyle={styles.list}
+        renderItem={({ item }) => (
+          <Card style={styles.card} onPress={() => navigation.navigate('MasterDetail', { master: item })}>
+            <View style={styles.cardHeader}>
+              <CategoryIcon category={item.category} size={20} />
+              <View style={styles.cardHeaderInfo}>
+                <Text style={typography.heading}>{item.user?.phone || 'Мастер'}</Text>
+                {item.reviews_count > 0 && (
+                  <RatingStars rating={item.avg_rating} reviewsCount={item.reviews_count} size={13} />
+                )}
+              </View>
+              <StatusBadge isFree={item.is_free} compact />
+            </View>
+            <Text style={[typography.bodyMuted, styles.bio]} numberOfLines={2}>
+              {item.bio || 'Нет описания'}
             </Text>
-          )}
-          <Text style={styles.bio} numberOfLines={2}>
-            {item.bio || 'Нет описания'}
-          </Text>
-          {item.city && <Text style={styles.meta}>📍 {item.city.name_ru}</Text>}
-        </TouchableOpacity>
-      )}
-      keyExtractor={(item) => String(item.id)}
-      onEndReached={() => hasMore && loadMasters()}
-      onEndReachedThreshold={0.5}
-      ListEmptyComponent={
-        <View style={styles.center}>
-          <Text style={styles.empty}>Мастера не найдены</Text>
-        </View>
-      }
-    />
+            {item.city && <Text style={typography.caption}>📍 {item.city.name_ru}</Text>}
+          </Card>
+        )}
+        keyExtractor={(item) => String(item.id)}
+        onEndReached={() => hasMore && loadMasters()}
+        onEndReachedThreshold={0.5}
+        ListEmptyComponent={
+          <EmptyState icon="people-outline" title="Мастера не найдены" subtitle="Попробуйте выбрать другой город" />
+        }
+      />
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  list: { padding: 12 },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
+  center: { justifyContent: 'center', alignItems: 'center' },
+  list: { padding: spacing.lg },
+  card: { marginBottom: spacing.md },
   cardHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    gap: spacing.md,
+    marginBottom: spacing.sm,
   },
-  name: { fontSize: 16, fontWeight: '600' },
-  dot: { width: 12, height: 12, borderRadius: 6 },
-  rating: { fontSize: 13, color: '#f5a623', marginBottom: 4 },
-  bio: { fontSize: 14, color: '#666', marginBottom: 6 },
-  meta: { fontSize: 12, color: '#999' },
-  empty: { fontSize: 16, color: '#999' },
+  cardHeaderInfo: { flex: 1, gap: 2 },
+  bio: { marginBottom: spacing.xs },
 });

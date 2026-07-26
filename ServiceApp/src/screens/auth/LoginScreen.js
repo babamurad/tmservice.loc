@@ -1,14 +1,11 @@
 import { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../hooks/useAuth';
+import ScreenContainer from '../../components/ScreenContainer';
+import TextField from '../../components/TextField';
+import Button from '../../components/Button';
+import { colors, spacing, typography } from '../../theme';
 
 export default function LoginScreen({ navigation }) {
   const { login } = useAuth();
@@ -32,59 +29,60 @@ export default function LoginScreen({ navigation }) {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Вход</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Телефон"
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Пароль"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleLogin}
-        disabled={loading}
+    <ScreenContainer>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Войти</Text>
-        )}
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-        <Text style={styles.link}>Нет аккаунта? Зарегистрироваться</Text>
-      </TouchableOpacity>
-    </View>
+        <View style={styles.container}>
+          <View style={styles.badge}>
+            <Ionicons name="hammer" size={32} color={colors.primary} />
+          </View>
+          <Text style={[typography.display, styles.title]}>Найди мастера</Text>
+          <Text style={[typography.bodyMuted, styles.subtitle]}>
+            Сантехник, электрик и другие мастера рядом с вами
+          </Text>
+
+          <TextField
+            placeholder="Телефон"
+            value={phone}
+            onChangeText={setPhone}
+            keyboardType="phone-pad"
+            autoCapitalize="none"
+          />
+          <TextField
+            placeholder="Пароль"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+
+          <Button title="Войти" onPress={handleLogin} loading={loading} style={styles.button} />
+
+          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+            <Text style={styles.link}>Нет аккаунта? Зарегистрироваться</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 20 },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 30, textAlign: 'center' },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 14,
-    marginBottom: 14,
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 8,
+  flex: { flex: 1 },
+  container: { flex: 1, justifyContent: 'center', padding: spacing.xl },
+  badge: {
+    alignSelf: 'center',
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.primaryLight,
     alignItems: 'center',
-    marginBottom: 16,
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  link: { color: '#007AFF', textAlign: 'center', fontSize: 14 },
+  title: { textAlign: 'center' },
+  subtitle: { textAlign: 'center', marginTop: spacing.xs, marginBottom: spacing.xxl },
+  button: { marginTop: spacing.sm, marginBottom: spacing.lg },
+  link: { color: colors.primary, textAlign: 'center', fontSize: 14, fontWeight: '600' },
 });
