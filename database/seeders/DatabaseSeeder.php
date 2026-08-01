@@ -17,9 +17,17 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
         ]);
 
+        // 'phone' раньше был email-адресом ('babamurad2010@yandex.ru') — это
+        // поле для входа по номеру телефона, а не контактная почта. Логин
+        // технически работал (сверяется просто строка), но реальным номером
+        // это никогда не было — путало при ручном тестировании.
         User::factory()->admin()->create([
-            'phone' => 'babamurad2010@yandex.ru',
+            'phone' => '+993610000001',
             'password' => bcrypt('password'),
         ]);
+
+        if (app()->environment(['local', 'testing'])) {
+            $this->call(DemoDataSeeder::class);
+        }
     }
 }
