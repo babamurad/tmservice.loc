@@ -28,7 +28,7 @@ export default function RegisterScreen({ navigation }) {
     try {
       await register(phone, password, role);
     } catch (err) {
-      Alert.alert('Ошибка', err.message?.[0] || 'Ошибка регистрации');
+      Alert.alert('Ошибка', err.message || 'Ошибка регистрации');
     } finally {
       setLoading(false);
     }

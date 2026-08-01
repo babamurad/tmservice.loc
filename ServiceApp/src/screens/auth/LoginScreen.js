@@ -22,7 +22,7 @@ export default function LoginScreen({ navigation }) {
     try {
       await login(phone, password);
     } catch (err) {
-      Alert.alert('Ошибка', err.message?.[0] || 'Неверный телефон или пароль');
+      Alert.alert('Ошибка', err.message || 'Неверный телефон или пароль');
     } finally {
       setLoading(false);
     }
