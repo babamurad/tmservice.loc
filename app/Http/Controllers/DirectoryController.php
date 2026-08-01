@@ -16,7 +16,7 @@ class DirectoryController extends Controller
             return City::where('is_active', true)->get();
         });
 
-        return $this->cachedJson($request, $cities);
+        return $this->cachedJson($request, $cities->values());
     }
 
     public function categories(Request $request): JsonResponse
@@ -25,7 +25,7 @@ class DirectoryController extends Controller
             return Category::where('is_active', true)->get();
         });
 
-        return $this->cachedJson($request, $categories);
+        return $this->cachedJson($request, $categories->values());
     }
 
     /**

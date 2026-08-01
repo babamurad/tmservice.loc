@@ -36,7 +36,11 @@ export async function fetchDirectory(endpoint, cacheKey) {
     throw new Error(`Request to ${endpoint} failed: ${res.status}`);
   }
 
-  const data = await res.json();
+  const rawData = await res.json();
+  let data = rawData?.data !== undefined ? rawData.data : rawData;
+  if (!Array.isArray(data) && data && typeof data === 'object') {
+    data = Object.values(data);
+  }
   if (!Array.isArray(data)) {
     throw new Error(`Unexpected response shape from ${endpoint}: expected an array`);
   }

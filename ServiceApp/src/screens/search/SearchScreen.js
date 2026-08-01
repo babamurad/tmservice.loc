@@ -51,7 +51,7 @@ export default function SearchScreen({ navigation }) {
       if (selectedCategory) params.append('category_id', selectedCategory);
 
       const data = await api(`/masters?${params}`);
-      setResults(data.data);
+      setResults(data?.data || (Array.isArray(data) ? data : []));
     } catch (err) {
       console.error(err);
       setResults([]);

@@ -7,7 +7,7 @@ import Button from '../../components/Button';
 import { spacing } from '../../theme';
 
 export default function EditProfileScreen({ route, navigation }) {
-  const { profile } = route.params;
+  const profile = route.params?.profile || {};
   const [bio, setBio] = useState(profile.bio || '');
   const [cityId, setCityId] = useState(String(profile.city_id || ''));
   const [categoryId, setCategoryId] = useState(String(profile.category_id || ''));

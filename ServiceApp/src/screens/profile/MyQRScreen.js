@@ -6,7 +6,7 @@ import Card from '../../components/Card';
 import { colors, spacing, typography } from '../../theme';
 
 export default function MyQRScreen({ route }) {
-  const { profile } = route.params;
+  const profile = route.params?.profile || {};
   const [qrUrl, setQrUrl] = useState(null);
   const [loading, setLoading] = useState(true);
 
