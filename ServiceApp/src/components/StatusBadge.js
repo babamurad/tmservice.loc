@@ -2,8 +2,8 @@ import { View, Text, StyleSheet } from 'react-native';
 import { colors, radius, spacing } from '../theme';
 
 export default function StatusBadge({ isFree, compact = false }) {
-  const tint = isFree ? colors.success : colors.danger;
-  const bg = isFree ? colors.successLight : colors.dangerLight;
+  const tint = isFree ? '#1E8449' : colors.danger;
+  const bg = isFree ? '#E1F3E8' : colors.dangerLight;
   const label = isFree ? 'Свободен' : 'Занят';
 
   if (compact) {
@@ -23,11 +23,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    borderRadius: radius.pill,
+    borderRadius: 20,
     paddingHorizontal: spacing.md,
-    paddingVertical: 5,
+    paddingVertical: 6,
     gap: spacing.xs,
   },
-  dot: { width: 9, height: 9, borderRadius: 5 },
-  label: { fontSize: 12.5, fontWeight: '700' },
+  dot: { width: 8, height: 8, borderRadius: 4 },
+  label: { fontSize: 13, fontWeight: '700' },
 });

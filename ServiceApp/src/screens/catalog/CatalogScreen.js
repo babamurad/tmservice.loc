@@ -90,15 +90,18 @@ export default function CatalogScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  center: { justifyContent: 'center', alignItems: 'center' },
+  center: { justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
   cityRow: { flexDirection: 'row', flexWrap: 'wrap', padding: spacing.lg, gap: spacing.sm },
   grid: { padding: spacing.lg },
-  gridRow: { justifyContent: 'space-between', marginBottom: spacing.md },
+  gridRow: { justifyContent: 'space-between', marginBottom: spacing.lg },
   categoryCard: {
     flex: 1,
     alignItems: 'center',
-    marginHorizontal: spacing.xs,
+    justifyContent: 'center',
+    marginHorizontal: spacing.sm,
     paddingVertical: spacing.xl,
+    borderRadius: 24,
+    ...colors.shadows.small,
   },
-  categoryName: { marginTop: spacing.md, textAlign: 'center' },
+  categoryName: { marginTop: spacing.md, textAlign: 'center', fontFamily: 'serif' },
 });

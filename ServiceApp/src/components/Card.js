@@ -14,9 +14,8 @@ export default function Card({ children, onPress, style }) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: radius.md,
+    borderRadius: 20, // More friendly radius
     padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
+    ...colors.shadows.small,
   },
 });

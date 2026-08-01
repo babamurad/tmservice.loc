@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Image, FlatList, StyleSheet, ActivityIndicator, Linking, Alert } from 'react-native';
+import { View, Text, Image, ScrollView, FlatList, StyleSheet, ActivityIndicator, Linking, Alert } from 'react-native';
 import { api } from '../../api/client';
 import { useAuth } from '../../hooks/useAuth';
 import ScreenContainer from '../../components/ScreenContainer';
@@ -97,111 +97,155 @@ export default function MasterDetailScreen({ route }) {
   }
 
   return (
-    <ScreenContainer>
-      <FlatList
-        data={detail.portfolio_images}
-        contentContainerStyle={styles.container}
-        ListHeaderComponent={
-          <>
-            <View style={styles.header}>
-              <Avatar phone={detail.user?.phone} size={64} />
-              <View style={styles.headerInfo}>
-                <Text style={typography.title}>{detail.user?.phone}</Text>
-                <View style={styles.statusRow}>
-                  <StatusBadge isFree={detail.is_free} />
-                </View>
-                {detail.reviews_count > 0 && (
-                  <RatingStars rating={detail.avg_rating} reviewsCount={detail.reviews_count} />
-                )}
-                {detail.city && <Text style={typography.caption}>📍 {detail.city.name_ru}</Text>}
-                {detail.category && <Text style={typography.caption}>📋 {detail.category.name_ru}</Text>}
-              </View>
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+      {/* Decorative Cover */}
+      <View style={styles.cover}>
+        <View style={styles.coverPattern} />
+      </View>
+
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.avatarWrapper}>
+            <Avatar phone={detail.user?.phone} size={80} />
+          </View>
+          <View style={styles.headerInfo}>
+            <Text style={typography.title}>{detail.user?.phone}</Text>
+            <View style={styles.statusRow}>
+              <StatusBadge isFree={detail.is_free} />
             </View>
-
-            {detail.bio && (
-              <View style={styles.section}>
-                <Text style={[typography.heading, styles.sectionTitle]}>О себе</Text>
-                <Text style={typography.body}>{detail.bio}</Text>
-              </View>
+            {detail.reviews_count > 0 && (
+              <RatingStars rating={detail.avg_rating} reviewsCount={detail.reviews_count} />
             )}
+            <View style={styles.tags}>
+              {detail.city && <Text style={typography.caption}>📍 {detail.city.name_ru}</Text>}
+              {detail.category && <Text style={typography.caption}>📋 {detail.category.name_ru}</Text>}
+            </View>
+          </View>
+        </View>
 
-            {detail.portfolio_images?.length > 0 && (
-              <View style={styles.section}>
-                <Text style={[typography.heading, styles.sectionTitle]}>Портфолио</Text>
-              </View>
-            )}
-          </>
-        }
-        renderItem={({ item }) => (
-          <Image
-            source={{ uri: `https://tmservice.loc/storage/${item.image_path}` }}
-            style={styles.portfolioImage}
-            resizeMode="cover"
-          />
+        <Button title="Связаться с мастером" icon="call" variant="primary" onPress={handleCall} style={styles.callButton} />
+
+        {detail.bio && (
+          <View style={styles.section}>
+            <Text style={[typography.heading, styles.sectionTitle]}>О себе</Text>
+            <Text style={typography.body}>{detail.bio}</Text>
+          </View>
         )}
-        keyExtractor={(item) => String(item.id)}
-        ListFooterComponent={
-          <>
-            <Button title="Позвонить" icon="call" variant="success" onPress={handleCall} style={styles.callButton} />
 
-            <View style={styles.section}>
-              <Text style={[typography.heading, styles.sectionTitle]}>Отзывы</Text>
-
-              {reviewsLoading ? (
-                <ActivityIndicator color={colors.primary} />
-              ) : reviews.length === 0 ? (
-                <Text style={typography.bodyMuted}>Пока нет отзывов</Text>
-              ) : (
-                reviews.map((review) => (
-                  <Card key={review.id} style={styles.reviewItem}>
-                    <RatingStars rating={review.rating} size={14} />
-                    {review.comment && (
-                      <Text style={[typography.body, styles.reviewComment]}>{review.comment}</Text>
-                    )}
-                  </Card>
-                ))
+        {detail.portfolio_images?.length > 0 && (
+          <View style={styles.section}>
+            <Text style={[typography.heading, styles.sectionTitle]}>Портфолио</Text>
+            <FlatList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              data={detail.portfolio_images}
+              keyExtractor={(item) => String(item.id)}
+              renderItem={({ item }) => (
+                <Image
+                  source={{ uri: `https://tmservice.loc/storage/${item.image_path}` }}
+                  style={styles.portfolioImage}
+                  resizeMode="cover"
+                />
               )}
+              contentContainerStyle={styles.portfolioContainer}
+            />
+          </View>
+        )}
 
-              {canReview && (
-                <Card style={styles.reviewForm}>
-                  <Text style={[typography.heading, styles.sectionTitle]}>Оставить отзыв</Text>
-                  <RatingStars rating={ratingInput} interactive onChange={setRatingInput} size={18} />
-                  <TextField
-                    style={styles.commentInput}
-                    placeholder="Комментарий (необязательно)"
-                    value={commentInput}
-                    onChangeText={setCommentInput}
-                    multiline
-                    numberOfLines={3}
-                  />
-                  <Button title="Отправить" icon="send" onPress={submitReview} loading={submitting} />
-                </Card>
-              )}
-            </View>
-          </>
-        }
-      />
-    </ScreenContainer>
+        <View style={styles.section}>
+          <Text style={[typography.heading, styles.sectionTitle]}>Отзывы</Text>
+
+          {reviewsLoading ? (
+            <ActivityIndicator color={colors.primary} style={{ marginTop: spacing.md }} />
+          ) : reviews.length === 0 ? (
+            <Text style={typography.bodyMuted}>Пока нет отзывов</Text>
+          ) : (
+            reviews.map((review) => (
+              <Card key={review.id} style={styles.reviewItem}>
+                <RatingStars rating={review.rating} size={14} />
+                {review.comment && (
+                  <Text style={[typography.body, styles.reviewComment]}>{review.comment}</Text>
+                )}
+              </Card>
+            ))
+          )}
+
+          {canReview && (
+            <Card style={styles.reviewForm}>
+              <Text style={[typography.heading, styles.sectionTitle]}>Оставить отзыв</Text>
+              <RatingStars rating={ratingInput} interactive onChange={setRatingInput} size={22} />
+              <TextField
+                style={styles.commentInput}
+                placeholder="Ваш комментарий (необязательно)"
+                value={commentInput}
+                onChangeText={setCommentInput}
+                multiline
+                numberOfLines={3}
+              />
+              <Button title="Отправить" icon="send" onPress={submitReview} loading={submitting} />
+            </Card>
+          )}
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  center: { justifyContent: 'center', alignItems: 'center' },
-  container: { padding: spacing.lg },
-  header: { flexDirection: 'row', marginBottom: spacing.xl, gap: spacing.lg },
-  headerInfo: { flex: 1, justifyContent: 'center', gap: spacing.xs },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
+  scroll: { flex: 1, backgroundColor: colors.bg },
+  scrollContent: { paddingBottom: spacing.xxl },
+  cover: {
+    height: 120,
+    backgroundColor: colors.primary,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    overflow: 'hidden',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+  coverPattern: {
+    flex: 1,
+    opacity: 0.1,
+    backgroundColor: colors.primaryDark,
+    // A placeholder for a background pattern image
+  },
+  container: {
+    padding: spacing.lg,
+    paddingTop: 80, // Offset for cover overlap
+  },
+  header: {
+    flexDirection: 'row',
+    marginBottom: spacing.lg,
+    gap: spacing.lg,
+    alignItems: 'flex-end',
+  },
+  avatarWrapper: {
+    padding: 4,
+    backgroundColor: colors.bg,
+    borderRadius: 50,
+  },
+  headerInfo: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingBottom: spacing.sm,
+  },
   statusRow: { marginVertical: 2 },
+  tags: { flexDirection: 'row', gap: spacing.md, marginTop: 4, flexWrap: 'wrap' },
   section: { marginBottom: spacing.xl },
   sectionTitle: { marginBottom: spacing.md },
+  portfolioContainer: { gap: spacing.md, paddingRight: spacing.lg },
   portfolioImage: {
-    width: '100%',
+    width: 280,
     height: 200,
-    borderRadius: 12,
-    marginBottom: spacing.md,
+    borderRadius: 20,
   },
-  callButton: { marginTop: spacing.md, marginBottom: spacing.xxl },
+  callButton: { marginBottom: spacing.xl },
   reviewItem: { marginBottom: spacing.sm, gap: spacing.xs },
   reviewComment: { marginTop: spacing.xs },
-  reviewForm: { marginTop: spacing.md },
-  commentInput: { marginTop: spacing.md, minHeight: 70, textAlignVertical: 'top' },
+  reviewForm: { marginTop: spacing.lg, backgroundColor: colors.surface, padding: spacing.xl },
+  commentInput: { marginTop: spacing.md, minHeight: 80, textAlignVertical: 'top' },
 });

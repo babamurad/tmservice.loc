@@ -35,8 +35,9 @@ export default function LoginScreen({ navigation }) {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.container}>
+          <View style={styles.coverPattern} />
           <View style={styles.badge}>
-            <Ionicons name="hammer" size={32} color={colors.primary} />
+            <Ionicons name="hammer" size={40} color={colors.primary} />
           </View>
           <Text style={[typography.display, styles.title]}>Найди мастера</Text>
           <Text style={[typography.bodyMuted, styles.subtitle]}>
@@ -69,20 +70,32 @@ export default function LoginScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  container: { flex: 1, justifyContent: 'center', padding: spacing.xl },
+  flex: { flex: 1, backgroundColor: colors.bg },
+  container: { flex: 1, justifyContent: 'center', padding: spacing.xxl },
+  coverPattern: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 250,
+    backgroundColor: colors.primaryDark,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
+    opacity: 0.1,
+  },
   badge: {
     alignSelf: 'center',
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: colors.primaryLight,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xl,
+    ...colors.shadows.medium,
   },
-  title: { textAlign: 'center' },
-  subtitle: { textAlign: 'center', marginTop: spacing.xs, marginBottom: spacing.xxl },
-  button: { marginTop: spacing.sm, marginBottom: spacing.lg },
-  link: { color: colors.primary, textAlign: 'center', fontSize: 14, fontWeight: '600' },
+  title: { textAlign: 'center', fontFamily: 'serif' },
+  subtitle: { textAlign: 'center', marginTop: spacing.xs, marginBottom: spacing.xxl, lineHeight: 22 },
+  button: { marginTop: spacing.md, marginBottom: spacing.xl },
+  link: { color: colors.primary, textAlign: 'center', fontSize: 15, fontWeight: '700' },
 });

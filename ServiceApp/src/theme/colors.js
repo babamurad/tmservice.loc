@@ -27,4 +27,29 @@ export const colors = {
 
   overlay: 'rgba(36, 27, 27, 0.55)',
   white: '#FFFFFF',
+
+  // Soft Shadows for UI depth
+  shadows: {
+    small: {
+      shadowColor: '#A6283A',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    medium: {
+      shadowColor: '#A6283A',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    large: {
+      shadowColor: '#A6283A',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.15,
+      shadowRadius: 16,
+      elevation: 8,
+    }
+  }
 };

@@ -79,15 +79,15 @@ export default function MastersListScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  center: { justifyContent: 'center', alignItems: 'center' },
-  list: { padding: spacing.lg },
-  card: { marginBottom: spacing.md },
+  center: { justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
+  list: { padding: spacing.lg, gap: spacing.md },
+  card: { padding: spacing.xl, borderRadius: 24, ...colors.shadows.medium },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
   },
-  cardHeaderInfo: { flex: 1, gap: 2 },
-  bio: { marginBottom: spacing.xs },
+  cardHeaderInfo: { flex: 1, gap: 4 },
+  bio: { marginBottom: spacing.md, lineHeight: 22 },
 });

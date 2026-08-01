@@ -110,14 +110,19 @@ export default function MyProfileScreen({ navigation }) {
   }
 
   return (
-    <ScreenContainer>
+    <ScreenContainer style={styles.screenBg}>
       <FlatList
         data={profile?.portfolio_images || []}
         contentContainerStyle={styles.container}
         ListHeaderComponent={
           <>
+            <View style={styles.cover}>
+              <View style={styles.coverPattern} />
+            </View>
             <View style={styles.header}>
-              <Avatar phone={profile?.user?.phone} size={60} />
+              <View style={styles.avatarWrapper}>
+                <Avatar phone={profile?.user?.phone} size={80} />
+              </View>
               <View style={styles.headerInfo}>
                 <Text style={typography.title}>{profile?.user?.phone}</Text>
                 <Text style={typography.bodyMuted}>Мастер</Text>
@@ -128,14 +133,14 @@ export default function MyProfileScreen({ navigation }) {
               <View style={styles.statusRow}>
                 <Text style={typography.heading}>Статус</Text>
                 <View style={styles.toggleRow}>
-                  <Text style={{ color: profile?.is_free ? colors.success : colors.danger, fontWeight: '600' }}>
+                  <Text style={{ color: profile?.is_free ? '#1E8449' : colors.danger, fontWeight: '600' }}>
                     {profile?.is_free ? 'Свободен' : 'Занят'}
                   </Text>
                   <Switch
                     value={profile?.is_free}
                     onValueChange={toggleStatus}
                     disabled={toggling}
-                    trackColor={{ false: colors.border, true: colors.success }}
+                    trackColor={{ false: colors.border, true: '#1E8449' }}
                   />
                 </View>
               </View>
@@ -189,10 +194,13 @@ export default function MyProfileScreen({ navigation }) {
                 variant="outline"
                 onPress={pickImage}
                 loading={uploading}
+                style={{ marginBottom: spacing.md }}
               />
             </View>
           </>
         }
+        numColumns={2}
+        columnWrapperStyle={styles.portfolioGridRow}
         renderItem={({ item }) => (
           <View style={styles.portfolioItem}>
             <Image
@@ -224,16 +232,44 @@ export default function MyProfileScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   center: { justifyContent: 'center', alignItems: 'center' },
-  container: { padding: spacing.lg },
-  header: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg, marginBottom: spacing.xl },
-  headerInfo: { flex: 1 },
+  screenBg: { backgroundColor: colors.bg },
+  container: { padding: spacing.lg, paddingTop: 80 },
+  cover: {
+    height: 120,
+    backgroundColor: colors.primary,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    overflow: 'hidden',
+    position: 'absolute',
+    top: -80,
+    left: -spacing.lg,
+    right: -spacing.lg,
+  },
+  coverPattern: {
+    flex: 1,
+    opacity: 0.1,
+    backgroundColor: colors.primaryDark,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: spacing.lg,
+    marginBottom: spacing.xl,
+  },
+  avatarWrapper: {
+    padding: 4,
+    backgroundColor: colors.bg,
+    borderRadius: 50,
+  },
+  headerInfo: { flex: 1, paddingBottom: spacing.sm },
   section: { marginBottom: spacing.md },
   sectionTitle: { marginBottom: spacing.sm },
   statusRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   toggleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   actionButton: { marginBottom: spacing.md },
-  portfolioItem: { marginBottom: spacing.md },
-  portfolioImage: { width: '100%', height: 200, borderRadius: 12 },
+  portfolioGridRow: { justifyContent: 'space-between', marginBottom: spacing.md },
+  portfolioItem: { flex: 0.48, borderRadius: 16, overflow: 'hidden' },
+  portfolioImage: { width: '100%', height: 160, borderRadius: 16 },
   deletePhotoButton: {
     position: 'absolute',
     top: spacing.sm,
@@ -245,5 +281,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoutButton: { marginTop: spacing.lg, marginBottom: spacing.xxl },
+  logoutButton: { marginTop: spacing.xl, marginBottom: spacing.xxl },
 });
