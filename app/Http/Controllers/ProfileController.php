@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MasterProfile;
 use App\Models\PortfolioImage;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
@@ -16,9 +17,21 @@ class ProfileController extends Controller
 {
     private const MAX_PORTFOLIO_IMAGES = 10;
 
+    private function getMasterProfile(Request $request): ?MasterProfile
+    {
+        $user = $request->user();
+        $profile = $user->masterProfile;
+
+        if (! $profile) {
+            $profile = $user->masterProfile()->create();
+        }
+
+        return $profile;
+    }
+
     public function show(Request $request): JsonResponse
     {
-        $profile = $request->user()->masterProfile;
+        $profile = $this->getMasterProfile($request);
 
         if (! $profile) {
             return response()->json(['message' => 'Профиль не найден.'], 404);
@@ -31,7 +44,7 @@ class ProfileController extends Controller
 
     public function update(Request $request): JsonResponse
     {
-        $profile = $request->user()->masterProfile;
+        $profile = $this->getMasterProfile($request);
 
         if (! $profile) {
             return response()->json(['message' => 'Профиль не найден.'], 404);
@@ -50,7 +63,7 @@ class ProfileController extends Controller
 
     public function status(Request $request): JsonResponse
     {
-        $profile = $request->user()->masterProfile;
+        $profile = $this->getMasterProfile($request);
 
         if (! $profile) {
             return response()->json(['message' => 'Профиль не найден.'], 404);
@@ -63,7 +76,7 @@ class ProfileController extends Controller
 
     public function portfolio(Request $request): JsonResponse
     {
-        $profile = $request->user()->masterProfile;
+        $profile = $this->getMasterProfile($request);
 
         if (! $profile) {
             return response()->json(['message' => 'Профиль не найден.'], 404);
@@ -98,7 +111,7 @@ class ProfileController extends Controller
 
     public function deletePortfolio(Request $request, int $id): JsonResponse|Response
     {
-        $profile = $request->user()->masterProfile;
+        $profile = $this->getMasterProfile($request);
 
         if (! $profile) {
             return response()->json(['message' => 'Профиль не найден.'], 404);
@@ -122,7 +135,7 @@ class ProfileController extends Controller
 
     public function generateQr(Request $request): JsonResponse
     {
-        $profile = $request->user()->masterProfile;
+        $profile = $this->getMasterProfile($request);
 
         if (! $profile) {
             return response()->json(['message' => 'Профиль не найден.'], 404);

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, Switch, TouchableOpacity, FlatList, Image, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, Switch, TouchableOpacity, FlatList, Image, StyleSheet, ActivityIndicator, Alert, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../hooks/useAuth';
@@ -23,7 +23,9 @@ export default function MyProfileScreen({ navigation }) {
       const data = await api('/profile');
       setProfile(data);
     } catch (err) {
-      console.error(err);
+      if (err?.status !== 404) {
+        console.error(err);
+      }
     } finally {
       setLoading(false);
     }
@@ -64,11 +66,16 @@ export default function MyProfileScreen({ navigation }) {
     try {
       const formData = new FormData();
       const file = result.assets[0];
-      formData.append('image', {
-        uri: file.uri,
-        type: file.mimeType || 'image/jpeg',
-        name: file.fileName || 'photo.jpg',
-      });
+      if (Platform.OS === 'web') {
+        const webFile = file.file || await (await fetch(file.uri)).blob();
+        formData.append('image', webFile, file.fileName || 'photo.jpg');
+      } else {
+        formData.append('image', {
+          uri: file.uri,
+          type: file.mimeType || 'image/jpeg',
+          name: file.fileName || 'photo.jpg',
+        });
+      }
 
       await apiUpload('/profile/portfolio', formData);
       await loadProfile();
