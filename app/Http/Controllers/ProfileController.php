@@ -17,12 +17,18 @@ class ProfileController extends Controller
 {
     private const MAX_PORTFOLIO_IMAGES = 10;
 
+    /**
+     * Автосоздание — только для role=master. Без этого условия любой
+     * клиент, обратившийся сюда (например, GET /api/profile по ошибке),
+     * получал бы себе пустой MasterProfile — тот же счётчик, что и у
+     * настоящих мастеров, включая попадание в очередь модерации в админке.
+     */
     private function getMasterProfile(Request $request): ?MasterProfile
     {
         $user = $request->user();
         $profile = $user->masterProfile;
 
-        if (! $profile) {
+        if (! $profile && $user->role === 'master') {
             $profile = $user->masterProfile()->create();
         }
 

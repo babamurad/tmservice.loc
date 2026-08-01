@@ -13,8 +13,6 @@ class DirectoryController extends Controller
 {
     public function cities(Request $request): JsonResponse
     {
-        class_exists(Collection::class);
-
         $cities = Cache::remember(City::CACHE_KEY, 86400, function () {
             return City::where('is_active', true)->get();
         });
@@ -30,8 +28,6 @@ class DirectoryController extends Controller
 
     public function categories(Request $request): JsonResponse
     {
-        class_exists(Collection::class);
-
         $categories = Cache::remember(Category::CACHE_KEY, 86400, function () {
             return Category::where('is_active', true)->get();
         });
