@@ -108,6 +108,26 @@ function MainTabs() {
   );
 }
 
+// Диплинк на карточку мастера (из QR / `/m/{id}`, см. plan/02-mobile.md, Этап 6).
+// Работает через кастомную схему `serviceapp://m/5` в dev/standalone-сборке уже
+// сейчас; `https://<домен>/m/5` (настоящие Universal Links) подключится тем же
+// путём после появления прод-домена — добавить его строкой в prefixes и
+// ios.associatedDomains/android.intentFilters в app.json, без правки этого конфига.
+// Открытие диплинка без логина (AuthStack смонтирован вместо MainTabs) сейчас
+// просто не резолвится — пользователь увидит экран входа, без краша.
+const linking = {
+  prefixes: ['serviceapp://'],
+  config: {
+    screens: {
+      Catalog: {
+        screens: {
+          MasterDetail: 'm/:id',
+        },
+      },
+    },
+  },
+};
+
 function RootNavigator() {
   const { user, loading } = useAuth();
 
@@ -120,7 +140,7 @@ function RootNavigator() {
   }
 
   return (
-    <NavigationContainer theme={navigationTheme}>
+    <NavigationContainer theme={navigationTheme} linking={linking}>
       {user ? <MainTabs /> : <AuthStack />}
     </NavigationContainer>
   );

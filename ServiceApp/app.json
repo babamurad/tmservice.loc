@@ -3,6 +3,7 @@
     "name": "ServiceApp",
     "slug": "ServiceApp",
     "version": "1.0.0",
+    "scheme": "serviceapp",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

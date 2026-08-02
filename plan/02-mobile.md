@@ -91,12 +91,33 @@ REST (`POST /api/profile/status`), уже сделано. Laravel Reverb для
 
 ## Этап 6. Universal Links / App Links (парный этап к `01-backend.md` Этап 4A)
 
-- [ ] Шаг 6.1: `app.json`/`app.config.js`:
-  - iOS: `associatedDomains: ["applinks:{домен}"]`.
-  - Android: `intentFilters` с `autoVerify: true` на `https`-схему и хост домена.
-- [ ] Шаг 6.2: Обработать входящий линк через `expo-linking`, смаппить `/m/{id}` на `MasterDetailScreen` (внутри `CatalogStack`, либо отдельный deep-link handler в `App.js`, который программно переключает навигацию).
+- [x] Шаг 6.2: `App.js` — `linking`-конфиг на `NavigationContainer`
+  (`prefixes: ['serviceapp://']`, `Catalog.MasterDetail: 'm/:id'`).
+  `MasterDetailScreen` раньше требовал полный объект `route.params.master`
+  (доставал `master.id`) — при переходе по диплинку известен только `id` из
+  URL, экран упал бы на `Cannot read properties of undefined`. Теперь читает
+  `route.params.id ?? route.params.master.id`, работает и со списком
+  (передаёт весь объект), и с диплинком (передаёт только `id`).
+  `app.json` получил `"scheme": "serviceapp"` — кастомная схема
+  (`serviceapp://m/5`) уже работает в dev/standalone-сборке уже сейчас,
+  проверить: `npx uri-scheme open serviceapp://m/5 --ios` (или `--android`)
+  после `npx expo prebuild`. Через Expo Go кастомные схемы не тестируются —
+  нужен dev-client/standalone build.
+- [ ] Шаг 6.1: **заблокировано — нет продакшен-домена.** `tmservice.loc` —
+  локальный псевдо-TLD OSPanel, не резолвится извне, не годится для
+  `associatedDomains`/`intentFilters`. Бэкенд-часть (`config/deeplink.php`,
+  `.well-known/apple-app-site-association`, `/assetlinks.json`, см.
+  `01-backend.md` Этап 4A) уже параметризована через `.env` и ничего не
+  требует менять в коде. Когда появится домен и подписанная сборка (Apple
+  Team ID / Android SHA256 из EAS):
+  1. `.env`: `APPLE_APP_BUNDLE_ID`, `APPLE_TEAM_ID`, `ANDROID_PACKAGE_NAME`, `ANDROID_SHA256_CERT_FINGERPRINTS`.
+  2. `app.json`: `ios.associatedDomains: ["applinks:{домен}"]`, `android.intentFilters` с `autoVerify: true` на `https://{домен}/m/*`.
+  3. В `App.js` `linking.prefixes` добавить `'https://{домен}'` — конфиг `screens` менять не придётся.
 
-**Критерии приёмки**: скан QR с установленным приложением открывает нужный экран мастера напрямую, без прохождения через веб-страницу.
+**Критерии приёмки**: скан QR с установленным приложением открывает нужный
+экран мастера напрямую, без прохождения через веб-страницу. Пока достижимо
+только через кастомную схему на собранном dev/standalone-билде — полноценные
+Universal Links (открытие по обычной `https`-ссылке без схемы) ждут домена.
 
 ---
 

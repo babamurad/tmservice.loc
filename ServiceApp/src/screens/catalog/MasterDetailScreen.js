@@ -12,7 +12,9 @@ import TextField from '../../components/TextField';
 import { colors, spacing, typography } from '../../theme';
 
 export default function MasterDetailScreen({ route }) {
-  const { master } = route.params;
+  // route.params.master (полный объект) приходит при переходе из списка/поиска;
+  // route.params.id — из диплинка (QR/`/m/{id}`), где известен только id.
+  const masterId = route.params.id ?? route.params.master.id;
   const { user } = useAuth();
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -31,7 +33,7 @@ export default function MasterDetailScreen({ route }) {
 
   async function loadDetail() {
     try {
-      const data = await api(`/masters/${master.id}`);
+      const data = await api(`/masters/${masterId}`);
       setDetail(data);
     } catch (err) {
       console.error(err);
@@ -42,7 +44,7 @@ export default function MasterDetailScreen({ route }) {
 
   async function loadReviews() {
     try {
-      const data = await api(`/masters/${master.id}/reviews`);
+      const data = await api(`/masters/${masterId}/reviews`);
       setReviews(data.data);
     } catch (err) {
       console.error(err);
@@ -59,7 +61,7 @@ export default function MasterDetailScreen({ route }) {
 
     setSubmitting(true);
     try {
-      await api(`/masters/${master.id}/reviews`, {
+      await api(`/masters/${masterId}/reviews`, {
         method: 'POST',
         body: JSON.stringify({ rating: ratingInput, comment: commentInput || null }),
       });
