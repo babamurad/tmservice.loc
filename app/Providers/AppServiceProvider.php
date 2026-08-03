@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Contracts\SmsGateway;
 use App\Services\Sms\LogSmsGateway;
+use App\Services\Sms\TwilioSmsGateway;
+use App\Services\Sms\VonageSmsGateway;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -16,9 +18,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Реальный провайдер для +993 ещё не выбран (нужен спайк — см.
-        // plan/01-backend.md, Этап 2A) — пока единственная реализация.
-        $this->app->bind(SmsGateway::class, LogSmsGateway::class);
+        // Какой провайдер реально доставляет SMS на +993 — не подтверждено
+        // живым тестом (см. plan/sms-gateway-spike.md), поэтому выбор идёт
+        // через SMS_GATEWAY в .env, а не хардкодом. 'log' — безопасный дефолт.
+        $this->app->bind(SmsGateway::class, function () {
+            return match (config('sms.driver')) {
+                'vonage' => new VonageSmsGateway(
+                    config('sms.vonage.api_key'),
+                    config('sms.vonage.api_secret'),
+                    config('sms.vonage.from'),
+                ),
+                'twilio' => new TwilioSmsGateway(
+                    config('sms.twilio.account_sid'),
+                    config('sms.twilio.auth_token'),
+                    config('sms.twilio.from'),
+                ),
+                default => new LogSmsGateway,
+            };
+        });
     }
 
     /**
