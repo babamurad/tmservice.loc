@@ -23,8 +23,12 @@ export default function MasterDetailScreen({ route }) {
   const [ratingInput, setRatingInput] = useState(0);
   const [commentInput, setCommentInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showReportForm, setShowReportForm] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportSubmitting, setReportSubmitting] = useState(false);
 
   const canReview = user?.role === 'client' && !!user?.phone_verified_at;
+  const canReport = !!user?.phone_verified_at && user?.id !== detail?.user?.id;
 
   useEffect(() => {
     loadDetail();
@@ -72,6 +76,28 @@ export default function MasterDetailScreen({ route }) {
       Alert.alert('Ошибка', err?.message || 'Не удалось отправить отзыв');
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function submitReport() {
+    if (!reportReason.trim()) {
+      Alert.alert('Жалоба', 'Опишите, в чём проблема');
+      return;
+    }
+
+    setReportSubmitting(true);
+    try {
+      await api(`/masters/${masterId}/reports`, {
+        method: 'POST',
+        body: JSON.stringify({ reason: reportReason }),
+      });
+      setReportReason('');
+      setShowReportForm(false);
+      Alert.alert('Спасибо', 'Жалоба отправлена, мы её рассмотрим');
+    } catch (err) {
+      Alert.alert('Ошибка', err?.message || 'Не удалось отправить жалобу');
+    } finally {
+      setReportSubmitting(false);
     }
   }
 
@@ -188,6 +214,32 @@ export default function MasterDetailScreen({ route }) {
             </Card>
           )}
         </View>
+
+        {canReport && (
+          <View style={styles.section}>
+            {showReportForm ? (
+              <Card style={styles.reviewForm}>
+                <Text style={[typography.heading, styles.sectionTitle]}>Пожаловаться на мастера</Text>
+                <TextField
+                  style={styles.commentInput}
+                  placeholder="Опишите проблему"
+                  value={reportReason}
+                  onChangeText={setReportReason}
+                  multiline
+                  numberOfLines={3}
+                />
+                <Button title="Отправить жалобу" icon="flag" onPress={submitReport} loading={reportSubmitting} />
+              </Card>
+            ) : (
+              <Button
+                title="Пожаловаться на мастера"
+                icon="flag-outline"
+                variant="outline"
+                onPress={() => setShowReportForm(true)}
+              />
+            )}
+          </View>
+        )}
       </View>
     </ScrollView>
   );

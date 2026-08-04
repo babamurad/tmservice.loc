@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Models\Category;
 use App\Models\City;
 use App\Models\MasterProfile;
+use App\Models\Report;
 use App\Models\Review;
 use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget;
@@ -22,6 +23,8 @@ class DashboardStatsWidget extends StatsOverviewWidget
             Stat::make('Мастеров одобрено', MasterProfile::where('moderation_status', 'approved')->count())
                 ->color('success'),
             Stat::make('Отзывов на модерации', Review::where('moderation_status', 'pending')->count())
+                ->color('warning'),
+            Stat::make('Жалоб на рассмотрении', Report::where('status', 'pending')->count())
                 ->color('warning'),
             Stat::make('Пользователей', User::count()),
         ];

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CityController as AdminCityController;
 use App\Http\Controllers\Admin\MasterModerationController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ReviewModerationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AuthController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\MasterController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
@@ -44,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/qr', [ProfileController::class, 'generateQr']);
 
     Route::post('/masters/{id}/reviews', [ReviewController::class, 'store']);
+    Route::post('/masters/{id}/reports', [ReportController::class, 'store']);
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
@@ -66,4 +69,8 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::get('/reviews', [ReviewModerationController::class, 'index']);
     Route::post('/reviews/{review}/approve', [ReviewModerationController::class, 'approve']);
     Route::post('/reviews/{review}/reject', [ReviewModerationController::class, 'reject']);
+
+    Route::get('/reports', [AdminReportController::class, 'index']);
+    Route::post('/reports/{report}/resolve', [AdminReportController::class, 'resolve']);
+    Route::post('/reports/{report}/dismiss', [AdminReportController::class, 'dismiss']);
 });

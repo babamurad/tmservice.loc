@@ -6,11 +6,13 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Resources\Categories\Pages\ManageCategories;
 use App\Filament\Resources\Cities\Pages\ManageCities;
 use App\Filament\Resources\MasterProfiles\Pages\ListMasterProfiles;
+use App\Filament\Resources\Reports\Pages\ListReports;
 use App\Filament\Resources\Reviews\Pages\ListReviews;
 use App\Filament\Resources\Users\Pages\ManageUsers;
 use App\Models\Category;
 use App\Models\City;
 use App\Models\MasterProfile;
+use App\Models\Report;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -75,6 +77,7 @@ class FilamentAdminPanelTest extends TestCase
         $this->get('/admin/categories')->assertOk();
         $this->get('/admin/master-profiles')->assertOk();
         $this->get('/admin/reviews')->assertOk();
+        $this->get('/admin/reports')->assertOk();
         $this->get('/admin/users')->assertOk();
     }
 
@@ -181,5 +184,27 @@ class FilamentAdminPanelTest extends TestCase
 
         Livewire::test(ManageUsers::class)
             ->assertCanSeeTableRecords(User::where('phone', '+993630000085')->get());
+    }
+
+    public function test_admin_can_resolve_and_dismiss_report(): void
+    {
+        $masterUser = User::create(['phone' => '+993630000086', 'password' => Hash::make('secret123'), 'role' => 'master']);
+        $profile = MasterProfile::create(['user_id' => $masterUser->id]);
+        $client = User::create(['phone' => '+993630000087', 'password' => Hash::make('secret123'), 'role' => 'client']);
+        $report = Report::create(['reporter_id' => $client->id, 'master_profile_id' => $profile->id, 'reason' => 'Жалоба']);
+
+        $this->actingAs($this->admin());
+
+        Livewire::test(ListReports::class)
+            ->set('activeTab', 'all')
+            ->callTableAction('resolve', $report);
+
+        $this->assertSame('resolved', $report->fresh()->status);
+
+        Livewire::test(ListReports::class)
+            ->set('activeTab', 'all')
+            ->callTableAction('dismiss', $report);
+
+        $this->assertSame('dismissed', $report->fresh()->status);
     }
 }

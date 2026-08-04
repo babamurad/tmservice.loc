@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MasterProfile;
 use App\Models\Review;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -53,12 +52,5 @@ class ReviewController extends Controller
         ]);
 
         return response()->json($review, 201);
-    }
-
-    private function findPublicMaster(int $id): MasterProfile
-    {
-        return MasterProfile::where('moderation_status', 'approved')
-            ->whereHas('user', fn ($q) => $q->whereNotNull('phone_verified_at'))
-            ->findOrFail($id);
     }
 }
