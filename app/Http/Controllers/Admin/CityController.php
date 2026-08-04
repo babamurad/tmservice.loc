@@ -7,6 +7,7 @@ use App\Models\City;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\Rule;
 
 class CityController extends Controller
 {
@@ -21,6 +22,9 @@ class CityController extends Controller
             'name_ru' => 'required|string|max:255',
             'name_tm' => 'required|string|max:255',
             'is_active' => 'boolean',
+            // Только головной город (без своего parent_city_id) может быть
+            // родителем — не допускаем посёлок-у-посёлка (см. plan/README.md).
+            'parent_city_id' => ['nullable', 'integer', Rule::exists('cities', 'id')->whereNull('parent_city_id')],
         ]);
 
         return response()->json(City::create($validated), 201);
@@ -32,6 +36,12 @@ class CityController extends Controller
             'name_ru' => 'sometimes|required|string|max:255',
             'name_tm' => 'sometimes|required|string|max:255',
             'is_active' => 'sometimes|boolean',
+            'parent_city_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('cities', 'id')->whereNull('parent_city_id'),
+                Rule::notIn([$city->id]),
+            ],
         ]);
 
         $city->update($validated);

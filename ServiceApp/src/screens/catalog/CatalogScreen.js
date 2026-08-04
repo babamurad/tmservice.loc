@@ -62,7 +62,10 @@ export default function CatalogScreen({ navigation }) {
   return (
     <ScreenContainer>
       <View style={styles.cityRow}>
-        {cities.map((city) => (
+        {/* Посёлки-спутники (city.parent_city_id) не показываем отдельными
+            чипами — выбор головного города на бэкенде уже включает мастеров
+            из его посёлков, см. plan/README.md. */}
+        {cities.filter((city) => !city.parent_city_id).map((city) => (
           <Chip
             key={city.id}
             label={city.name_ru}

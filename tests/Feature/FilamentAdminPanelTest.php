@@ -100,6 +100,24 @@ class FilamentAdminPanelTest extends TestCase
         $this->assertDatabaseHas('cities', ['name_ru' => 'Туркменабад']);
     }
 
+    public function test_admin_can_create_satellite_city_via_panel(): void
+    {
+        $turkmenabat = City::create(['name_ru' => 'Туркменабад', 'name_tm' => 'Türkmenabat']);
+
+        $this->actingAs($this->admin());
+
+        Livewire::test(ManageCities::class)
+            ->callAction('create', data: [
+                'name_ru' => 'Фарап',
+                'name_tm' => 'Farap',
+                'parent_city_id' => $turkmenabat->id,
+                'is_active' => true,
+            ])
+            ->assertHasNoActionErrors();
+
+        $this->assertDatabaseHas('cities', ['name_ru' => 'Фарап', 'parent_city_id' => $turkmenabat->id]);
+    }
+
     public function test_admin_can_create_category(): void
     {
         $this->actingAs($this->admin());

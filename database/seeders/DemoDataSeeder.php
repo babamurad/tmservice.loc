@@ -25,6 +25,14 @@ class DemoDataSeeder extends Seeder
         $turkmenabat = City::where('name_ru', 'Туркменабад')->firstOrFail();
         $ashgabat = City::where('name_ru', 'Ашхабад')->firstOrFail();
 
+        // Демонстрация посёлков-спутников (см. plan/README.md) — Фарап
+        // числится отдельным городом в поиске (city_id узнаваем), но мастер
+        // из него обязан попадать в выдачу по city_id=Туркменабад тоже.
+        $farap = City::firstOrCreate(
+            ['name_ru' => 'Фарап'],
+            ['name_tm' => 'Farap', 'parent_city_id' => $turkmenabat->id],
+        );
+
         $plumber = Category::where('name_ru', 'Сантехник')->firstOrFail();
         $electrician = Category::where('name_ru', 'Электрик')->firstOrFail();
         $autoRepair = Category::where('name_ru', 'Ремонт авто')->firstOrFail();
@@ -37,6 +45,7 @@ class DemoDataSeeder extends Seeder
             ['phone' => '+993610000011', 'city' => $turkmenabat, 'category' => $electrician, 'is_free' => false, 'bio' => 'Электромонтаж под ключ: проводка, розетки, счётчики.'],
             ['phone' => '+993610000012', 'city' => $turkmenabat, 'category' => $autoRepair, 'is_free' => true, 'bio' => 'Ремонт двигателя и ходовой части, выезд с инструментом.'],
             ['phone' => '+993610000013', 'city' => $ashgabat, 'category' => $furniture, 'is_free' => true, 'bio' => 'Сборка и ремонт мебели любой сложности.'],
+            ['phone' => '+993610000014', 'city' => $farap, 'category' => $plumber, 'is_free' => true, 'bio' => 'Сантехник в Фарапе, выезжаю и в Туркменабад.'],
         ] as $data) {
             $user = User::factory()->master()->create([
                 'phone' => $data['phone'],
@@ -92,6 +101,7 @@ class DemoDataSeeder extends Seeder
                 ['master', '+993610000011', 'Электрик, Туркменабад, занят'],
                 ['master', '+993610000012', 'Ремонт авто, Туркменабад, свободен, 1 отзыв (4★)'],
                 ['master', '+993610000013', 'Сборка мебели, Ашхабад, свободен'],
+                ['master', '+993610000014', 'Сантехник, Фарап (посёлок Туркменабада), свободен'],
                 ['client', '+993610000020', 'уже оставил отзыв мастеру #1'],
                 ['client', '+993610000021', 'уже оставил отзыв мастеру #3, может оставить ещё'],
             ],

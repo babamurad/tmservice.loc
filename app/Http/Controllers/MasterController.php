@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\City;
 use App\Models\MasterProfile;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -16,7 +17,7 @@ class MasterController extends Controller
             ->where('moderation_status', 'approved');
 
         if ($request->filled('city_id')) {
-            $query->where('city_id', $request->city_id);
+            $query->whereIn('city_id', $this->resolveCityIds((int) $request->city_id));
         }
 
         if ($request->filled('category_id')) {
@@ -38,6 +39,24 @@ class MasterController extends Controller
             ->paginate(15);
 
         return response()->json($masters);
+    }
+
+    /**
+     * Головной город (parent_city_id = null) — ищем и в нём самом, и во всех
+     * его посёлках-спутниках (клиент из Туркменабада должен видеть мастеров
+     * из соседних посёлков, а не только по точному city_id). Если передан
+     * id самого посёлка — клиент явно сузил поиск, ищем только по нему.
+     * См. plan/README.md, "Города и посёлки-спутники Туркменабада".
+     */
+    private function resolveCityIds(int $cityId): array
+    {
+        $city = City::find($cityId);
+
+        if (! $city || $city->isSatellite()) {
+            return [$cityId];
+        }
+
+        return City::where('id', $cityId)->orWhere('parent_city_id', $cityId)->pluck('id')->all();
     }
 
     /**

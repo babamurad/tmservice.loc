@@ -83,7 +83,9 @@ export default function SearchScreen({ navigation }) {
 
       {cities.length > 0 && (
         <View style={styles.filterRow}>
-          {cities.map((city) => (
+          {/* Посёлки-спутники не показываем отдельными чипами — выбор
+              головного города на бэкенде уже включает мастеров из них. */}
+          {cities.filter((city) => !city.parent_city_id).map((city) => (
             <Chip key={city.id} label={city.name_ru} active={selectedCity === city.id} onPress={() => toggleCity(city.id)} />
           ))}
         </View>
